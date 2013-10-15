@@ -132,6 +132,7 @@ of the `servant/standard-message`.  So the efficient result would be:
 ```
 
 The arguments to servant-thread are:  
+  
 * `servant-channel` - channel that contains the available workers
 * `servant/array-buffer-message-standard-reply` - A function that defines how the `.postMessage` function will be called (a.k.a mesage-fn)
 * `get-first-4bytes-as-str` - The servant function we defined earlier
