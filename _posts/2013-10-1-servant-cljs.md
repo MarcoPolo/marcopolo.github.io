@@ -76,7 +76,7 @@ serve as our "access points" to the web worker.
     (make-it-funny your-joke))
 ```
 
-The `defservantfn` macro simple calls a defn with the
+The `defservantfn` macro simply calls a defn with the
 same arguments, and registers that function with a hashmap atom for the
 webworker. The key is the hash of the function and the value is the function
 itself. The webworker needs to be able to know what function the browser is  
