@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Introducing Servant, a Clojurescript library for using web workers
+categories: clojure clojurescript
 ---
 
 # Concurrent Programming
