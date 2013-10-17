@@ -4,3 +4,4 @@ url: http://marcopolo.io
 markdown: redcarpet
 pygments: true
 safe: true
+permalink: /:year/:month/:day/:title.html
