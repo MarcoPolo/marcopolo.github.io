@@ -18,7 +18,7 @@ It matches your socks across several different layers of compatibility, to make 
 that we find the perfect match for you.
 
 ## Market Research
-100% of people who were socks have lost a single sock, sock singles is for them!
+100% of people who wear socks have lost a single sock, sock singles is for them!
 
 -----
 It was a lot of fun making such a ridiculous site. We parodied dating sites, which led to
@@ -83,7 +83,7 @@ tell the difference, and I wrote the code in half the time! win/win!
 I later ran into a problem writing the filters in Javascript. I needed to display the instersection
 of 3 filtered list of socks. Instead of coming up with a long (bug ridden) javascript
 implementation, I shelled out to Clojurescript and used sets and intersection to get the job done.
-I was afraid it would be noticeably slow, but I was thankfully wrong!
+I was afraid it would be noticeably slow, but, thankfully, I was wrong!
 
 ```clojure
 (defn ->vecs [arrays]
