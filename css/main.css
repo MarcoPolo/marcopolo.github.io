@@ -42,7 +42,7 @@ body {
   font: 13.34px 'Latin Modern Roman',Helvetica, Arial, sans-serif;
   font-size: small;
   text-align: center;
-  padding: 50px;
+  padding: 1em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -84,7 +84,7 @@ ul.posts span {
 .site {
   font-size: 115%;
   text-align: justify;
-  width: 42em;
+  max-width: 42em;
   margin: 3em auto 2em;
   line-height: 1.5em;
 }
