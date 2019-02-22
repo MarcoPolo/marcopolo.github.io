@@ -85,4 +85,4 @@ Sellers. Here's an excerpt of his thoughts on it.
 > penchants exist as yearnings beyond our understandings and why, when we are
 > young, we should indeed listen to our hearts.
 
-from: https://paulsellers.com/2018/03/theres-a-book-you-should-read/
+from [There's a book you should read](https://paulsellers.com/2018/03/theres-a-book-you-should-read/)

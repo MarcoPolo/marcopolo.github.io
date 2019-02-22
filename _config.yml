@@ -1,7 +1,7 @@
 name: MarcoPolo - Partially Functional 
 description: A blog about life as a function of time.
 url: http://marcopolo.io
-markdown: redcarpet
+markdown: kramdown
 highlighter: rouge
 safe: true
 permalink: /:year/:month/:day/:title.html
