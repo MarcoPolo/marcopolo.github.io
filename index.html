@@ -9,7 +9,7 @@ title: MarcoPolo - Partially Functional
     {% for post in site.posts %}
       {% if post.category == null %}
         <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{
-      post.url }}">{{ post.title }} foo {{ post.category }}</a></li>
+      post.url }}">{{ post.title | markdownify | remove: '<p>' | remove: '</p>' }}</a></li>
       {% endif %}
     {% endfor %}
   </ul>
@@ -17,7 +17,7 @@ title: MarcoPolo - Partially Functional
   <ul class="posts">
     {% for post in site.posts %}
       {% if !post.category == 'books' %}
-        <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+        <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title | markdownify | remove: '<p>' | remove: '</p>' }}</a></li>
       {% endif %}
     {% endfor %}
   </ul>
