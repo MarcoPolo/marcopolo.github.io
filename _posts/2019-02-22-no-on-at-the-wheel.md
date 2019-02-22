@@ -22,7 +22,7 @@ wished I had a self driving car to make the drive easier).
   Schwartz refutes some ideas about AVs that I thought were a given. First is
 that AVs, and AVs alone, will reduce traffic fatalities to nil. It's true that
 AVs can introduce technology that will reduce traffic fatalities, but it is also
-true that *right now* we have that technology that we can incorporate in non
+true that **right now** we have that technology that we can incorporate in non
 self driving vehicles. Technologies like front collision warning (reduces accidents
 by 7%), automatic front collision braking (reduces accidents by 15%), and lane
 detection are available today. These technologies are shown to make driving
