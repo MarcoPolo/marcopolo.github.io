@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Thoughts on _The Craftsman_ by Richard Sennet
+category: books
 ---
 
   I've finished my second read through of _The Craftsman_. It's an argument that
