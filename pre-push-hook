@@ -1,2 +1,3 @@
 #!/bin/bash
+zola build
 rsync -avzh public/ /keybase/private/marcopolo,kbpbot/blog/
