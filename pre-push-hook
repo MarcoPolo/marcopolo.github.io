@@ -1,0 +1,14 @@
+#!/bin/bash
+local_branch="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "$local_branch" == "src" ]; then
+	zola build &&
+	git co master &&
+	mv public/* ./
+	git add .
+	git ci -m "BUILD"
+	git push -fq --no-verify origin master
+	git co -
+fi
+
+
