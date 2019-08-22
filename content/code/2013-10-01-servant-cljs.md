@@ -1,5 +1,5 @@
 +++
-title = "Introducing Servant, a Clojurescript library for using web workers"
+title = "Introducing Servant, a Clojurescript library for web workers"
 [taxonomies]
 tags = ["javascript", "react-native", "JSI", "Go"]
 +++
