@@ -7,7 +7,7 @@
       <ul class="posts">
         {% for page in section.pages %}
           <li>
-            <span>{{ page.date | date(format="%b %e, %Y") }}</span> »
+            <span>{{ page.date | date(format="%b %d, %Y") }}</span> »
             <a href="{{ page.path }}">
               {{ page.title | markdown(inline=true) | safe }}
             </a>
