@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ page.title | markdown(inline=true) }}</h2>
+<p class="meta">{{ page.date | date(format="%b %e, %Y") }}</p>
+
+<div class="post">
+  {{ page.content | safe }}
+</div>
+{% endblock content %}

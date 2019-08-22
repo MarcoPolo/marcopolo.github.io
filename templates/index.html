@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="home">
+    {% for section_path in section.subsections %}
+      {% set section = get_section(path=section_path) %}
+      <a class="subsectionLink" href="{{ section.path }}""><h1>{{ section.title }}</h1></a>
+      <ul class="posts">
+        {% for page in section.pages %}
+          <li>
+            <span>{{ page.date | date(format="%b %e, %Y") }}</span> »
+            <a href="{{ page.path }}">
+              {{ page.title | markdown(inline=true) | safe }}
+            </a>
+            ⁠—
+            <em>{{ page.reading_time }} Min</em>
+          </li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+  </div>
+{% endblock content %}
