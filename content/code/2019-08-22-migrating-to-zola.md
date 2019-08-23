@@ -11,7 +11,7 @@ the time. You can have a source repo that compiles to a blog. Neat! Over time
 though I started really feeling the pain points with it. When I wanted to
 write a quick post about something I'd often spend hours just trying to get
 the right Ruby environment set up so I can see my blog locally. When I got an
-email from slack saying that my personal repo has a security vulnerability in
+email from GitHub saying that my personal repo has a security vulnerability in
 one of its Gems, I took the opportunity to switch over to
 [Zola](https://www.getzola.org).
 
