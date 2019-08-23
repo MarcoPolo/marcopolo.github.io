@@ -11,7 +11,7 @@ the time. You can have a source repo that compiles to a blog. Neat! Over time
 though I started really feeling the pain points with it. When I wanted to
 write a quick post about something I'd often spend hours just trying to get
 the right Ruby environment set up so I can see my blog locally. When I got an
-email from GitHub saying that my personal repo has a security vulnerability in
+email from GitHub saying that my blog repo has a security vulnerability in
 one of its Gems, I took the opportunity to switch over to
 [Zola](https://www.getzola.org).
 
@@ -19,7 +19,7 @@ one of its Gems, I took the opportunity to switch over to
 
 Zola make more sense to me than Jekyll. I think about my posts in a
 hierarchy. I'd like my source code to match my mental representation. If you
-look at the source of this blog, you'll see I have 3 folders (code, books,
+look at the [source](https://marcopolo.io/code/migrating-to-zola/) of this blog, you'll see I have 3 folders (code, books,
 life). In each folder there are relevant posts. I wanted my blog to show the
 contents folder as different sections. For the life of me I couldn't figure
 out how to do that in Jekyll. I ended up just using a single folder for all
@@ -80,4 +80,4 @@ argue it's a small thing, but I think these small things matter. It's already
 hard enough to sit down and write a post. I want every bit of the experience
 to be beautiful.
 
-But don't take my word for it! judge yourself: [Jekyll](https://github.com/MarcoPolo/marcopolo.github.io/tree/jekyll_archive) [Zola](https://github.com/MarcoPolo/marcopolo.github.io/tree/master)
+But don't take my word for it! judge yourself: [Jekyll](https://github.com/MarcoPolo/marcopolo.github.io/tree/jekyll_archive) vs. [Zola](https://github.com/MarcoPolo/marcopolo.github.io)
