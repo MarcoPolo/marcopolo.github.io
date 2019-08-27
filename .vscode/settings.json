@@ -3,5 +3,23 @@
   "html.format.enable": false,
   "[html]": {
     "editor.formatOnSave": false
-  }
+  },
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["0"],
+      "after": ["g", "0"]
+    },
+    {
+      "before": ["$"],
+      "after": ["g", "$"]
+    },
+    {
+      "before": ["j"],
+      "after": ["g", "j"]
+    },
+    {
+      "before": ["k"],
+      "after": ["g", "k"]
+    }
+  ]
 }

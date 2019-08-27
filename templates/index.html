@@ -6,6 +6,7 @@
       <a class="subsectionLink" href="{{ section.path }}""><h1>{{ section.title }}</h1></a>
       <ul class="posts">
         {% for page in section.pages %}
+          {% if page.draft == false %}
           <li>
             <span>{{ page.date | date(format="%b %d, %Y") }}</span> »
             <a href="{{ page.path }}">
@@ -14,6 +15,7 @@
             ⁠—
             <em>{{ page.reading_time }} Min</em>
           </li>
+          {% endif %}
         {% endfor %}
         </ul>
     {% endfor %}
