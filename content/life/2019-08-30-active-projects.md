@@ -10,6 +10,8 @@ tags = ["Rust"]
 
 An attempt at building a friend Rust UI library for Android.
 
+- Coming up: Add flex-box support on android
+
 ---
 
 ## Rusty Keybase Bot
