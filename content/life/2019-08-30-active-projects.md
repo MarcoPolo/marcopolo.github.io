@@ -1,7 +1,7 @@
 +++
 title = "Active Projects"
 [taxonomies]
-tags = ["Rust"]
+tags = ["Rust", "Julia"]
 +++
 
 # Active Projects (with updates)
@@ -19,3 +19,15 @@ An attempt at building a friend Rust UI library for Android.
 Build a Keybase Bot Library in Rust (With proper typings)
 
 - I rabbit holed into creating an AVDL parser with pest.
+
+---
+
+## Riding those new BART trains?
+
+- Is it possible to figure out when the new bart trains are arriving so I can optimize my commute to ride those puppies?
+
+---
+
+## Programmatically find Climbing crags
+
+- How can I parse USGS and GIS data to find good crags for climbing?
