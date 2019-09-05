@@ -5,6 +5,12 @@
 <p class="meta">{{ page.date | date(format="%b %e, %Y") }}</p>
 
 <div class="post">
+  {% if page.extra %}
+    {% if page.extra.redirectTo %}
+      {{ page.extra.redirectTo | safe }}
+      <meta http-equiv="Refresh" content="0; url={{ page.extra.redirectTo | safe }}">
+    {% endif %}
+  {% endif %}
   {{ page.content | safe }}
 </div>
 {% endblock content %}
