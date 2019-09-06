@@ -1,5 +1,5 @@
 +++
-title = "Interacting with Go from React Native through JSI"
+title = "Thoughts on \"Why is React doing this?\""
 [taxonomies]
 tags = ["javascript", "react"]
 +++
