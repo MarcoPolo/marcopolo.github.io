@@ -10,7 +10,11 @@ tags = ["Rust", "Julia"]
 
 https://www.youtube.com/watch?v=r-TLSBdHe1A&t=11s
 
-## (Android Wired)[https://github.com/MarcoPolo/android-wired/]
+---
+
+## Android Wired - A Rust UI framework for Android
+
+(repo)[https://github.com/MarcoPolo/android-wired/]
 
 An attempt at building a friend Rust UI library for Android.
 
