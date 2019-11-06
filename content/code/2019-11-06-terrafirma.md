@@ -124,4 +124,4 @@ This example uses Rust, so if you don't have that setup [go here first](https://
 
 6. Test it
 
-   `curl https://wasm.marcopolo.io/hello.wasm`
+   `curl https://example.com/hello.wasm`
