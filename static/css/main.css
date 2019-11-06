@@ -109,12 +109,25 @@ ul.posts span {
 /*
 /*****************************************************************************/
 
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
 .site {
   font-size: 115%;
   text-align: justify;
-  max-width: 42em;
   margin: 3em auto 2em;
   line-height: 1.5em;
+}
+
+.site p {
+  max-width: 42em;
+}
+
+.site pre {
+  max-width: 82em;
+  display: inline-block;
 }
 
 .site .header a {

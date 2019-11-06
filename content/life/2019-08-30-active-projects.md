@@ -12,6 +12,13 @@ https://www.youtube.com/watch?v=r-TLSBdHe1A&t=11s
 
 ---
 
+## fastly labs terrarium on KBFS
+
+Push wasm code, have it run on distributed servers for you
+(done)[https://marcopolo.io/wasm]
+
+---
+
 ## Android Wired - A Rust UI framework for Android
 
 (repo)[https://github.com/MarcoPolo/android-wired/]
