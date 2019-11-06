@@ -1,5 +1,6 @@
 +++
 title = "Wasm is the future of serverless. Terrafirma, serverless wasm functions."
+draft = true
 aliases = ["wasm"]
 [taxonomies]
 tags = ["wasm", "rust", "Go"]
