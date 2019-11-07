@@ -6,7 +6,7 @@ insert_anchor_links = "right"
 tags = ["wasm", "rust", "Go"]
 +++
 
-When I ran into Fastly's [Terrarium](https://wasm.fastlylabs.com/), the appeal of Webassembly (wasm) finally clicked for me. We could have lightweight sandboxes and bring in our own language and libraries without the overhead of a full OS VM or [Docker](https://blog.iron.io/the-overhead-of-docker-run/). That's great for the serverless provider, but it's also great for the end user. Less overhead means faster startup time and less total cost.
+When I ran into Fastly's [Terrarium](https://wasm.fastlylabs.com/), the appeal of Webassembly (wasm) finally clicked for me. We could have lightweight sandboxes and bring in my own language and libraries without the overhead of a full OS VM or [Docker](https://blog.iron.io/the-overhead-of-docker-run/). That's great for the serverless provider, but it's also great for the end user. Less overhead means faster startup time and less total cost.
 
 ## How much faster?
 
