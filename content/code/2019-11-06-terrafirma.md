@@ -37,7 +37,7 @@ The trend is that if you want safety and isolation, you must pay for it with ove
 
 ## What is Webassembly?
 
-Webassembly is a spec for a lightweight and sandboxed VM. Webassembly is run by a host, and can't do any side effects, unless it calls a function provided by the host. For example, if your WASM code wanted to make a GET request to a website, it could only do that by asking the host to help. The host exposes these helper function to the WASM guest. In Terrafirma, these are the `hostcall_*` functions in `imports.go`. It's called `imports.go` because it is what your WASM code is importing from the host.
+Webassembly is a spec for a lightweight and sandboxed VM. Webassembly is run by a host, and can't do any side effects, unless it calls a function provided by the host. For example, if your WASM code wanted to make a GET request to a website, it could only do that by asking the host to help. The host exposes these helper function to the WASM guest. In Terrafirma, these are the `hostcall_*` functions in [`imports.go`](https://github.com/MarcoPolo/go-wasm-terrafirma/blob/master/imports.go). It's called `imports.go` because it is what your WASM code is importing from the host.
 
 ## Bring your own tools
 
@@ -49,13 +49,13 @@ There isn't an industry standard for what imports a host should provide to the W
 
 ## Terrafirma
 
-Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user: [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwritting the old .wasm file with the new one.
+Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user: [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwriting the old .wasm file with the new one.
 
 ### Terrafirma – Hello World Tutorial
 
 This example uses Rust, so if you don't have that setup [go here first](https://rustup.rs/).
 
-1. Point your domain to TerraFirma servers, and set a `TXT` recordd to point to your shared folder
+1. Point your domain to TerraFirma servers, and set a `TXT` record to point to your shared folder
 
 ```
 
@@ -115,3 +115,5 @@ cp target/wasm32-unknown-unknown/release/terrafirma_helloworld.wasm /keybase/pri
 ```
 curl https://example.com/hello.wasm
 ```
+
+[terrafirma]: https://github.com/marcopolo/go-wasm-terrafirma
