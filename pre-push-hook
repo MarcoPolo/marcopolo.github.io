@@ -1,3 +1,5 @@
 #!/bin/bash
+set -e
 zola build
-rsync -avzh public/ /keybase/private/marcopolo,kbpbot/blog/
+rsync -azh public/ /keybase/private/marcopolo,kbpbot/blog/
+echo "Deployed"
