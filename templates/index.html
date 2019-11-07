@@ -3,7 +3,7 @@
   <div class="home">
     {% for section_path in section.subsections %}
       {% set section = get_section(path=section_path) %}
-      <a class="subsectionLink" href="{{ section.path }}""><h1>{{ section.title }}</h1></a>
+      <a class="subsectionLink" href="{{ section.path }}""><h3>{{ section.title }}</h3></a>
       <ul class="posts">
         {% for page in section.pages %}
           {% if page.draft == false %}

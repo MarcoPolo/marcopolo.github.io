@@ -24,7 +24,8 @@ avg: 725.912422ms
 Running: docker start -a reuse
 avg: 655.059021ms
 
-# Terrafirma – not a 1:1 comparison since this works on request & response not stdout. So it's doing more work.
+# Terrafirma – not a 1:1 comparison since this works on request & response not stdout
+# It's doing more work.
 Running: go test -benchmem -run="^$" github.com/marcopolo/go-wasm-terrafirma -bench "^(BenchmarkHello)$"
 avg : 68.57608ms
 ```
@@ -33,26 +34,7 @@ avg : 68.57608ms
 
 When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.
 
-```
-        ▲                                           ┌─────────┐
-        │                                           │ Full OS │
-        │          ┌────┐                  ┌──────┐ │ VM host │
-        │          │WASM│                  │Docker│ └─────────┘
-        │          └────┘                  └──────┘
-        │
-        │
-        │
- Safety │
-        │
-        │
-        │
-        │┌─────────┐
-        ││Platform │
-        ││ Binary  │
-        │└─────────┘
-        └────────────────────~~~~~~────────────────~───────────▶
-                        Overhead
-```
+![Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe.](/code/wasm-graph.png "Safety vs Overhead")
 
 The trend is that if you want safety and isolation, you must pay for it with overhead. WASM's exception to that rule is what I think makes it so promising and interesting.
 
@@ -80,48 +62,61 @@ This example uses Rust, so if you don't have that setup [go here first](https://
 
 1. Point your domain to TerraFirma servers, and set a `TXT` recordd to point to your shared folder
 
-   ```
-   example.com                300 CNAME terrafirma.marcopolo.io
+```
 
-   _keybase_pages.example.com 300 TXT   "kbp=/keybase/private/<my_keybase_username>,kbwasm/"
-   ```
+example.com 300 CNAME terrafirma.marcopolo.io
+
+\_keybase_pages.example.com 300 TXT "kbp=/keybase/private/<my_keybase_username>,kbwasm/"
+
+```
 
 2. Verify the DNS records are correct
 
-   ```
-   $ dig example.com CNAME
-   ...
-   ;; ANSWER SECTION:
-   example.com <number> IN CNAME kbp.keybaseapi.com.
-   ...
-   ```
+```
 
-   <br/>
+\$ dig example.com CNAME
+...
+;; ANSWER SECTION:
+example.com <number> IN CNAME kbp.keybaseapi.com.
+...
 
-   ```
-   $ dig _keybase_pages.example.com TXT
-   ...
-   ;; ANSWER SECTION:
-   _keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/marcopolo,kbpbot/my-site"
-   ...
-   ```
+```
+
+<br/>
+
+```
+
+\$ dig \_keybase_pages.example.com TXT
+...
+;; ANSWER SECTION:
+\_keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/marcopolo,kbpbot/my-site"
+...
+
+```
 
 3. Clone the Hello World Repo
 
-   `git clone git@github.com:MarcoPolo/terrafirma-hello-world.git`
+```
+git clone git@github.com:MarcoPolo/terrafirma-hello-world.git
+```
 
 4. Build it
 
-   `cd terrafirma-hello-world`
-
-   `cargo build --release`
+```
+cd terrafirma-hello-world
+cargo build --release
+```
 
 5. Deploy it
 
-   ```
-   cp target/wasm32-unknown-unknown/release/terrafirma_helloworld.wasm /keybase/private/<your_kb_username>,kbwasm/hello.wasm
-   ```
+```
+
+cp target/wasm32-unknown-unknown/release/terrafirma_helloworld.wasm /keybase/private/<your_kb_username>,kbwasm/hello.wasm
+
+```
 
 6. Test it
 
-   `curl https://example.com/hello.wasm`
+```
+curl https://example.com/hello.wasm
+```

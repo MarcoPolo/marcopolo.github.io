@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ page.title | markdown(inline=true) | safe }}</h2>
-{%if page.description %} <h4 class="description">  {{ page.description | markdown(inline=true) | safe }}</h4>{% endif %}
-<p class="meta">{{ page.date | date(format="%b %e, %Y") }}</p>
+<header>
+  <h2>{{ page.title | markdown(inline=true) | safe }}</h2>
+  {%if page.description %} <h4 class="description">  {{ page.description | markdown(inline=true) | safe }}</h4>{% endif %}
+  <p class="meta">{{ page.date | date(format="%b %e, %Y") }}</p>
+</header>
 
-<div class="post">
-  {% if page.extra %}
-    {% if page.extra.redirectTo %}
-      {{ page.extra.redirectTo | safe }}
-      <meta http-equiv="Refresh" content="0; url={{ page.extra.redirectTo | safe }}">
+<!-- <div class="postWrapper">
+  <div class="leftBumper"></div> -->
+<main>
+  <aside></aside>
+  <article class="post">
+    {% if page.extra %}
+      {% if page.extra.redirectTo %}
+        {{ page.extra.redirectTo | safe }}
+        <meta http-equiv="Refresh" content="0; url={{ page.extra.redirectTo | safe }}">
+      {% endif %}
     {% endif %}
-  {% endif %}
-  {{ page.content | safe }}
-</div>
+    {{ page.content | safe }}
+  </article>
+  <aside></aside>
+</main>
+  <!-- <div class="leftBumper"></div>
+</div> -->
 {% endblock content %}
