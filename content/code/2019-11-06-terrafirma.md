@@ -10,22 +10,24 @@ When I ran into Fastly's [Terrarium](https://wasm.fastlylabs.com/), the appeal o
 
 ## How much faster?
 
-On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms. Following [this experiment](https://blog.iron.io/the-overhead-of-docker-run/) I get these results:
+On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.
 
-```
-Running: ./hello.sh
-avg: 3.516431ms
-Running: docker run treeder/hello:sh
-avg: 692.306769ms
-Running: docker run --rm treeder/hello:sh
-avg: 725.912422ms
-Running: docker start -a reuse
-avg: 655.059021ms
-Running: node hello.js
-avg: 79.233337ms
-Running: wasmer run wasi-hello-world.wasm
-avg: 15.155896ms
-```
+Following [this experiment](https://blog.iron.io/the-overhead-of-docker-run/) I get these results:
+
+              ```
+              Running: ./hello.sh
+              avg: 3.516431ms
+              Running: docker run treeder/hello:sh
+              avg: 692.306769ms
+              Running: docker run --rm treeder/hello:sh
+              avg: 725.912422ms
+              Running: docker start -a reuse
+              avg: 655.059021ms
+              Running: node hello.js
+              avg: 79.233337ms
+              Running: wasmer run wasi-hello-world.wasm
+              avg: 15.155896ms
+              ```
 
 When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.
 
@@ -43,23 +45,23 @@ As long as you can compile everything to a .wasm file, you can use whatever tool
 
 ## What about a standard WASM Environment?
 
-There isn't an industry standard for what imports a host should provide to the WASM code running outside the browser. The closest thing we have is [WASI](https://wasi.dev/), which defines a POSIX inspired set of syscalls that a host should implement. It's useful because it allows code would otherwise require a real syscall to work in a WASM environment. For example, In Rust you can build with the `--target wasm32-wasi` flag and your code will just work in any [wasi environment](https://wasmer.io/).
+There isn't a mature industry standard for what imports a host should provide to the WASM code running outside the browser. The closest thing we have is [WASI](https://wasi.dev/), which defines a POSIX inspired set of syscalls that a host should implement. It's useful because it allows code would otherwise require a real syscall to work in a WASM environment. For example, In Rust you can build with the `--target wasm32-wasi` flag and your code will just work in any [wasi environment](https://wasmer.io/).
 
 ## Terrafirma
 
-Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user: [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwriting the old .wasm file with the new one.
+Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwriting the old .wasm file with the new one.
 
 ### Terrafirma – Hello World Tutorial
 
 This example uses Rust, so if you don't have that setup [go here first](https://rustup.rs/).
 
-1. Point your domain to TerraFirma servers, and set a `TXT` record to point to your shared folder
+1. Point your domain to TerraFirma servers (`terrafirma.marcopolo.io` or `52.53.126.109`) with an A record, and set a `TXT` record to point to your shared folder (e.g. `"kbp=/keybase/private/<my_keybase_username>,kbwasm/"`)
 
 ```
 
-example.com 300 CNAME terrafirma.marcopolo.io
+example.com 300 A terrafirma.marcopolo.io
 
-\_keybase_pages.example.com 300 TXT "kbp=/keybase/private/<my_keybase_username>,kbwasm/"
+_keybase_pages.example.com 300 TXT "kbp=/keybase/private/<my_keybase_username>,kbwasm/"
 
 ```
 
@@ -67,10 +69,10 @@ example.com 300 CNAME terrafirma.marcopolo.io
 
 ```
 
-\$ dig example.com CNAME
+$ dig example.com A
 ...
 ;; ANSWER SECTION:
-example.com <number> IN CNAME terrafirma.marcopolo.io.
+wasm.marcopolo.io.      300     IN      A       52.53.126.109
 ...
 
 ```
@@ -79,10 +81,10 @@ example.com <number> IN CNAME terrafirma.marcopolo.io.
 
 ```
 
-\$ dig \_keybase_pages.example.com TXT
+$ dig _keybase_pages.example.com TXT
 ...
 ;; ANSWER SECTION:
-\_keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/<my_keybase_username>,kbpbot/"
+_keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/<my_keybase_username>,kbpbot/"
 ...
 
 ```

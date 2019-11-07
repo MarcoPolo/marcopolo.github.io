@@ -253,6 +253,7 @@ article p img {
 
 /* standard */
 .post pre {
+  display: inline-block;
   border-radius: 10px;
   border: 1px solid #ddd;
   padding: 1em 1em;
