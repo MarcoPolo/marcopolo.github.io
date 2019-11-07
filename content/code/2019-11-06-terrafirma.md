@@ -1,7 +1,7 @@
 +++
 title = "Wasm is the future of serverless. Terrafirma, serverless wasm functions."
-draft = true
 aliases = ["wasm"]
+insert_anchor_links = "right"
 [taxonomies]
 tags = ["wasm", "rust", "Go"]
 +++
@@ -10,7 +10,7 @@ When I ran into Fastly's [Terrarium](https://wasm.fastlylabs.com/), the appeal o
 
 ## How much faster?
 
-On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a Terrafirma equivalent (translated to http request/response) takes 70ms.
+On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a Terrafirma equivalent (translated to http request/response) takes 15ms.
 
 I'm calculating overhead by making a hello world program and timing how long it takes to run. On my machine, following [this experiment](https://blog.iron.io/the-overhead-of-docker-run/) I get these results:
 
@@ -23,38 +23,33 @@ Running: docker run --rm treeder/hello:sh
 avg: 725.912422ms
 Running: docker start -a reuse
 avg: 655.059021ms
-
-# Terrafirma – not a 1:1 comparison since this works on request & response not stdout
-# It's doing more work.
-Running: go test -benchmem -run="^$" github.com/marcopolo/go-wasm-terrafirma -bench "^(BenchmarkHello)$"
-avg : 68.57608ms
+Running: wasmer run wasi-hello-world.wasm
+avg: 15.155896ms
+Running: node hello.js
+avg: 79.233337ms
 ```
-
-## Overhead
 
 When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.
 
 ![Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe.](/code/wasm-graph.png "Safety vs Overhead")
 
-The trend is that if you want safety and isolation, you must pay for it with overhead. WASM's exception to that rule is what I think makes it so promising and interesting.
+The trend is that if you want safety and isolation, you must pay for it with overhead. WASM's exception to that rule is what I think makes it so promising and interesting. Wasm provides the fastest way to run arbitrary user code in a sandboxed environment.
 
-## Webassembly
+## What is Webassembly?
 
-Webassembly is a spec for a lightweight and sandboxed VM. Webassembly is run by a host, and can't do any side effects, unless it calls a function provided by the host. For example, if your WASM code wanted to make a GET request to a website, it could only do that by asking the host do that for it. The host has to expose specific functions for wasm to call. In Terrafirma, these are the `hostcall_*` functions in `imports.go`. It's called `imports.go` because it is what your WASM code is importing from the host.
-
-## Webassembly Environment
-
-Webassembly is sandboxed and can't do very much without the host's cooperation.
-
-There isn't an industry standard for what imports a host should provide to the WASM code running outside the browser. The closest thing we have is [WASI](https://wasi.dev/), which defines a POSIX inspired set of syscalls that a host should implement. It's useful because it allows code would otherwise require a real syscall to work in a WASM environment.
+Webassembly is a spec for a lightweight and sandboxed VM. Webassembly is run by a host, and can't do any side effects, unless it calls a function provided by the host. For example, if your WASM code wanted to make a GET request to a website, it could only do that by asking the host to help. The host exposes these helper function to the WASM guest. In Terrafirma, these are the `hostcall_*` functions in `imports.go`. It's called `imports.go` because it is what your WASM code is importing from the host.
 
 ## Bring your own tools
 
 As long as you can compile everything to a .wasm file, you can use whatever tools and language you want. All I have to do is provide a runtime, and all you have to do is provide a wasm file. However, there is a subtle caveat here. The only way you can run side effects is with the host cooperation. So you (or some library you use) must understand the environment you're running in in order to do anything interesting.
 
+## What about a standard WASM Environment?
+
+There isn't an industry standard for what imports a host should provide to the WASM code running outside the browser. The closest thing we have is [WASI](https://wasi.dev/), which defines a POSIX inspired set of syscalls that a host should implement. It's useful because it allows code would otherwise require a real syscall to work in a WASM environment. For example, In Rust you can build with the `--target wasm32-wasi` flag and your code will just work in any [wasi environment](https://wasmer.io/).
+
 ## Terrafirma
 
-Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwritting the old .wasm file with the new one.
+Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user: [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwritting the old .wasm file with the new one.
 
 ### Terrafirma – Hello World Tutorial
 
@@ -77,7 +72,7 @@ example.com 300 CNAME terrafirma.marcopolo.io
 \$ dig example.com CNAME
 ...
 ;; ANSWER SECTION:
-example.com <number> IN CNAME kbp.keybaseapi.com.
+example.com <number> IN CNAME terrafirma.marcopolo.io.
 ...
 
 ```
@@ -89,7 +84,7 @@ example.com <number> IN CNAME kbp.keybaseapi.com.
 \$ dig \_keybase_pages.example.com TXT
 ...
 ;; ANSWER SECTION:
-\_keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/marcopolo,kbpbot/my-site"
+\_keybase_pages.example.com <number> IN TXT "kbp=/keybase/private/<my_keybase_username>,kbpbot/"
 ...
 
 ```
