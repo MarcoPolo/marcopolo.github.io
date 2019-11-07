@@ -10,7 +10,7 @@ When I ran into Fastly's [Terrarium](https://wasm.fastlylabs.com/), the appeal o
 
 ## How much faster?
 
-On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a Terrafirma equivalent (translated to http request/response) takes 15ms.
+On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.
 
 I'm calculating overhead by making a hello world program and timing how long it takes to run. On my machine, following [this experiment](https://blog.iron.io/the-overhead-of-docker-run/) I get these results:
 
