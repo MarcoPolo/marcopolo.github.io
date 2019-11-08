@@ -51,6 +51,11 @@ There isn't a mature industry standard for what imports a host should provide to
 
 Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared [KBFS folder](https://keybase.io/docs/kbfs) with the keybase user [kbwasm](https://keybase.io/kbwasm). Then you setup some DNS records to point your domain to TerraFirma's servers. And that's it! You can update the wasm code at any time by overwriting the old .wasm file with the new one.
 
+## Code Examples
+
+- [Hello World](https://github.com/MarcoPolo/terrafirma-scraper)
+- [Scraper Endpoint](https://github.com/MarcoPolo/terrafirma-scraper) – A web scraper that uses Servo – a new browser engine from Mozilla.
+
 ### Terrafirma – Hello World Tutorial
 
 This example uses Rust, so if you don't have that setup [go here first](https://rustup.rs/).
