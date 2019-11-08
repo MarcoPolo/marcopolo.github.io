@@ -14,20 +14,20 @@ On my machine™, a hello world shell script takes 3ms, a docker equivalent take
 
 Following [this experiment](https://blog.iron.io/the-overhead-of-docker-run/) I get these results:
 
-              ```
-              Running: ./hello.sh
-              avg: 3.516431ms
-              Running: docker run treeder/hello:sh
-              avg: 692.306769ms
-              Running: docker run --rm treeder/hello:sh
-              avg: 725.912422ms
-              Running: docker start -a reuse
-              avg: 655.059021ms
-              Running: node hello.js
-              avg: 79.233337ms
-              Running: wasmer run wasi-hello-world.wasm
-              avg: 15.155896ms
-              ```
+```
+Running: ./hello.sh
+avg: 3.516431ms
+Running: docker run treeder/hello:sh
+avg: 692.306769ms
+Running: docker run --rm treeder/hello:sh
+avg: 725.912422ms
+Running: docker start -a reuse
+avg: 655.059021ms
+Running: node hello.js
+avg: 79.233337ms
+Running: wasmer run wasi-hello-world.wasm
+avg: 15.155896ms
+```
 
 When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.
 
