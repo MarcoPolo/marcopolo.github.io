@@ -6,6 +6,8 @@ tags = ["Rust", "Julia"]
 
 # Active Projects (with updates)
 
+## Static Site Comments with Serverless WASM
+
 ## React Causal Profiler
 
 https://www.youtube.com/watch?v=r-TLSBdHe1A&t=11s
