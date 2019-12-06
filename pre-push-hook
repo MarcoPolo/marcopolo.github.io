@@ -1,4 +1,10 @@
 #!/bin/bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$BRANCH" != "master" ]]; then
+  echo 'Not pushing to kbp since not on master';
+  exit 0;
+fi
+
 set -e
 zola build
 rsync -azh public/ /keybase/private/marcopolo,kbpbot/blog/
