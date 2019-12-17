@@ -55,7 +55,7 @@ mod tests {
 }
 ```
 
-Now for the last chain in our telephone. We'll make a new C file that will call our rust defined add_one and our C defined add_two.
+Now for the last chain in our telephone. We'll make a new C file that will call our Rust defined `add_one` and our C defined `add_two`.
 
 ```c
 extern int add_one(int n);
@@ -67,14 +67,14 @@ int main()
 }
 ```
 
-We use clang to build this file:
+We use Clang to build this file:
 ```
 clang call_rust.c -lrust_c_playground -L./target/debug -o call_rust
 ```
 
 Now we have an executable called `call_rust` which calls a Rust defined function and calls a C defined function that it pulled in from a single Rust Library (called `librust_c_playground.dylib` on macOS). The flags in the clang command mean: `-l` link this library; `-L` look here for the library.
 
-We've build the code, now we can even run it!
+We've built the code, now we can even run it!
 ```
 ./call_rust
 echo $? # Print the return code of our program, hopefully 42
