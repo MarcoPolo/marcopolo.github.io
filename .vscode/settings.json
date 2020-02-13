@@ -4,22 +4,46 @@
   "[html]": {
     "editor.formatOnSave": false
   },
+  "[md]": {
+    "editor.tabSize": 2,
+  },
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": ["0"],
-      "after": ["g", "0"]
+      "before": [
+        "0"
+      ],
+      "after": [
+        "g",
+        "0"
+      ]
     },
     {
-      "before": ["$"],
-      "after": ["g", "$"]
+      "before": [
+        "$"
+      ],
+      "after": [
+        "g",
+        "$"
+      ]
     },
     {
-      "before": ["j"],
-      "after": ["g", "j"]
+      "before": [
+        "j"
+      ],
+      "after": [
+        "g",
+        "j"
+      ]
     },
     {
-      "before": ["k"],
-      "after": ["g", "k"]
+      "before": [
+        "k"
+      ],
+      "after": [
+        "g",
+        "k"
+      ]
     }
-  ]
+  ],
+  "editor.tabSize": 2
 }

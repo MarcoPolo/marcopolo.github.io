@@ -252,7 +252,7 @@ article p img {
 }
 
 /* standard */
-.post pre {
+.post pre:not(.embed) {
   display: inline-block;
   border-radius: 10px;
   border: 1px solid #ddd;
