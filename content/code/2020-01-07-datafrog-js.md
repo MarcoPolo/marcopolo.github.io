@@ -1035,7 +1035,7 @@ function joinInto(inputVariableA, inputVariableB, outputVariable, logicFn) {
 
 ## Our Datalog engine – in action
 
-We've build our engine, let's use it.
+We've built our engine, let's use it.
 
 Our grandparent example:
 
