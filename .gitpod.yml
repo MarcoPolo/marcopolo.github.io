@@ -2,3 +2,6 @@ tasks:
   - init: zola serve
 image:
   file: .gitpod.Dockerfile
+ports:
+- port: 1111 # zola
+- port: 1024 # zola ws
