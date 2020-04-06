@@ -53,7 +53,7 @@ Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to
 
 ## Code Examples
 
-- [Hello World](https://github.com/MarcoPolo/terrafirma-scraper)
+- [Hello World](https://github.com/MarcoPolo/terrafirma-hello-world)
 - [Scraper Endpoint](https://github.com/MarcoPolo/terrafirma-scraper) – A web scraper that uses Servo – a new browser engine from Mozilla.
 
 ### Terrafirma – Hello World Tutorial
