@@ -129,9 +129,8 @@ RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 ENTRYPOINT [ "/bin/sh" ]
 
 # Our production stage
-FROM alpine:latest
+FROM scratch
 WORKDIR /app
-RUN mkdir /nix
 # Copy the runtime dependencies into /nix/store
 # Note we don't actually have nix installed on this container. But that's fine,
 # we don't need it, the built code only relies on the given files existing, not
@@ -141,7 +140,7 @@ COPY --from=builder /app/result /app
 CMD ["/app/bin/hello"]
 ```
 
-If we build this `Dockerfile` with `docker build .`, we'll end up with an 39MB
+If we build this `Dockerfile` with `docker build .`, we'll end up with an 33MB
 container. Compare this to a naive
 [Dockerfile](https://gist.github.com/MarcoPolo/7953f1ca2691405b5b04659027967336)
 where we end up with a 624 MB container! That's an order of magnitude smaller
