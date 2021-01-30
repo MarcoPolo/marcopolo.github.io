@@ -14,6 +14,9 @@
     <!-- syntax highlighting CSS -->
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
+    {% block rss %}
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ get_url(path="atom.xml", trailing_slash=false) }}">
+    {% endblock %}
   </head>
   <body>
     <div class="container">
@@ -36,6 +39,8 @@
        <span class="ss">:github</span> <span class="s"><a href="https://github.com/marcopolo">github.com/marcopolo</a></span>
        <span class="ss">:keybase</span> <span class="s"><a
        href="https://keybase.io/marcopolo">marcopolo</a></span> <span class="p">}</span><span class="p">)</span>
+       <span class="ss">:rss</span> <span class="s"><a
+       href="{{current_url ~ "atom.xml"}}">atom.xml</a></span> <span class="p">}</span><span class="p">)</span>
                     </code>
                   </pre>
             </div>
