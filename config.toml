@@ -15,5 +15,9 @@ build_search_index = false
 
 generate_feed = true
 
+taxonomies = [
+    { name = "tags", feed = true},
+]
+
 [extra]
 # Put all your custom variables here
