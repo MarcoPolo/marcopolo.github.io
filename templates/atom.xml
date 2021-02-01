@@ -5,6 +5,9 @@
     {%- elif section.title %} - {{ section.title }}
 		{%- endif -%}
 	</title>
+	{%- if config.extra.author %}
+	<author>{{ config.extra.author }}</author>
+	{%- endif %}
 	{%- if config.description %}
 	<subtitle>{{ config.description }}</subtitle>
 	{%- endif %}
