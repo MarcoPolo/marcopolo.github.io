@@ -6,7 +6,7 @@
 		{%- endif -%}
 	</title>
 	{%- if config.extra.author %}
-	<author>{{ config.extra.author }}</author>
+	<author><name>{{ config.extra.author }}</name></author>
 	{%- endif %}
 	{%- if config.description %}
 	<subtitle>{{ config.description }}</subtitle>
