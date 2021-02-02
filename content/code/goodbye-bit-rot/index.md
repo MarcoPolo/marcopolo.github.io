@@ -5,6 +5,9 @@ summary = """
 Multi Stage builds are great for minimizing the size of your container. The
 general idea is you have..."""
 
+[taxonomies]
+tags = ["Nix", "foundations", "cryptic"]
+
 [extra]
 author = "Marco"
 +++
