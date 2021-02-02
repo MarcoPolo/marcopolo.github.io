@@ -137,9 +137,9 @@ can be pretty sure it will work for our colleague or ourselves in 10 years. Nix
 is building a solid foundation that I can no longer live without.
 
 If you haven't used Nix before, here's your call to action:
-* Nix's homepage: https://nixos.org/
-* Nix's Learning page: https://nixos.org/learn
-* Learn Nix in little bite-sized pills: https://nixos.org/guides/nix-pills/
+* Nix's homepage: [https://nixos.org/](https://nixos.org/)
+* Nix's Learning page: [https://nixos.org/learn](https://nixos.org/learn)
+* Learn Nix in little bite-sized pills: [https://nixos.org/guides/nix-pills/](https://nixos.org/guides/nix-pills/)
 
 ---
 
