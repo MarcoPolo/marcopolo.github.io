@@ -135,7 +135,13 @@ ul.posts span {
 }
 
 .site header {
+  max-width: 42em;
+  width: 100%;
   align-self: center;
+}
+
+.site header h2 {
+  text-align: center;
 }
 
 .site header .meta {
@@ -175,6 +181,8 @@ aside {
 
 article p img {
   max-width: 100%;
+  display: block;
+  margin: auto;
 }
 
 .site .header a {

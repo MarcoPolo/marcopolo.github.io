@@ -1,5 +1,5 @@
 {
-  description = "blog.cryptic.io";
+  description = "marcopolo.io";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/release-20.09";
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
@@ -14,7 +14,7 @@
             buildInputs = [ pkgs.zola ];
           };
           defaultPackage = pkgs.stdenv.mkDerivation {
-            name = "blog-1.0.0";
+            name = "marcopolo-blog-1.0.0";
             buildInputs = [ pkgs.zola ];
             src = ./.;
             installPhase = "mkdir $out; zola build; cp -r public/* $out/";
