@@ -1,5 +1,6 @@
 # The URL the site will be built for
 base_url = "https://marcopolo.io"
+title = "MarcoPolo – Partially Functional"
 
 generate_rss = true
 
