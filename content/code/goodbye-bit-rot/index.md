@@ -72,7 +72,7 @@ same exact shared library _B_.
 ## A concrete example. This will never bit rot.
 
 To continue our Smalltalk theme, here's a "Hello World" program that, barring a
-fundamental change in how Nix Flakes works, will work forever on an x86_64
+fundamental change in how Nix Flakes works, will work forever[^1] on an x86_64
 linux machine.
 
 
@@ -94,7 +94,8 @@ The definition of our program, `flake.nix`
 ```
 
 The pinned version of all our dependencies, `flake.lock`
-```jso{
+```json
+{
   "nodes": {
     "nixpkgs": {
       "locked": {
@@ -152,3 +153,7 @@ Google endpoint, the only way to use this program would be to emulate the whole
 Google stack or rely on that [endpoint existing](https://gcemetery.co/).
 Sometimes it's doable to emulate the external API, and sometimes it isn't. This
 post is specifically about cases where it is feasible to emulate the external API.
+
+
+### Footnotes
+[^1]: Okay forever is a really long time. And this will likely not run forever. But why? The easy reasons are: "Github is down", "A source tarball you need can't be fetched from the internet", "x86_64 processors can't be found or emulated". But what's a weird reason that this may fail in the future? It'll probably be hard to predict, but maybe something like: SHA256 has been broken and criminals and/or pranksters have published malicious packages that match a certain SHA256. So build tools that rely on a deterministic and hard to break hash algorithm like SHA256 (like what Nix does) will no longer be reliable. That would be a funny future. Send me your weird reasons: `"marco+forever" ++ "@marcopolo.io"`
