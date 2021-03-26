@@ -1,6 +1,6 @@
 +++
 title = "Simple Declarative VMs"
-date = 2021-03-07T00:00:00.000Z
+date = 2021-03-24T00:00:00.000Z
 
 [taxonomies]
 tags = ["Nix", "VMs", "cryptic"]
