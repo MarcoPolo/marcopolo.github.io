@@ -1,6 +1,5 @@
 +++
 title = "Declarative Dev Environments"
-draft = true
 [taxonomies]
 tags = ["Nix"]
 +++
