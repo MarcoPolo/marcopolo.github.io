@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - Container</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/container/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-05-15T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/container/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Nix and small containers with Docker multi-stage builds</title>
+		<published>2020-05-15T00:00:00+00:00</published>
+		<updated>2020-05-15T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/nix-and-small-containers/" type="text/html"/>
+		<id>https://marcopolo.io/code/nix-and-small-containers/</id>
+		<content type="html">&lt;p&gt;Multi Stage builds are great for minimizing the size of your container. The
+general idea is you have a stage as your builder and another stage as your
+product. This allows you to have a full development and build container while
+still having a lean production container. The production container only carries
+its runtime dependencies.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; golang:1.7.3
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;go get -d -v golang.org&#x2F;x&#x2F;net&#x2F;html
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; app.go .
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; alpine:latest
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;apk --no-cache add ca-certificates
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;root&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;app .
+CMD [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;app&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(from Docker&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;develop&#x2F;develop-images&#x2F;multistage-build&#x2F;&quot;&gt;docs on multi-stage&lt;&#x2F;a&gt;)&lt;&#x2F;p&gt;
+&lt;p&gt;Sounds great, right? What&#x27;s the catch? Well, it&#x27;s not always easy to know what the
+runtime dependencies are. For example you may have installed something in &#x2F;lib
+that was needed in the build process. But it turned out to be a shared library
+and now it needs to be included in the production container. Tricky! Is there
+some automated way to know all your runtime dependencies?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-nix&quot;&gt;Enter Nix&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;&quot;&gt;Nix&lt;&#x2F;a&gt; is a functional and immutable package manager. It works great for
+reproducible builds. It keeps track of packages and their dependencies via their
+content hashes. And, relevant for this exercise, it also keeps track of the
+dependencies of a built package. That means we can use Nix to build our project
+and then ask Nix what our runtime dependencies are. With that information we can
+copy just those files to the product stage of our multi-stage build and end up
+with the smallest possible docker container.&lt;&#x2F;p&gt;
+&lt;p&gt;Our general strategy will be to use a Nix builder to build our code. Ask the Nix
+builder to tell us all the runtime dependencies of our built executable. Then
+copy the executable with all it&#x27;s runtime dependencies to a fresh container. Our
+expectation is that this will result in a minimal production container.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;example&quot;&gt;Example&lt;&#x2F;h2&gt;
+&lt;p&gt;As a simple example let&#x27;s package a &amp;quot;Hello World&amp;quot; program in Rust. The code is
+what you&#x27;d expect:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
+    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello, world!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;);
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;nix-build-expression&quot;&gt;Nix build expression&lt;&#x2F;h3&gt;
+&lt;p&gt;If we were just building this locally, we&#x27;d just run &lt;code&gt;cargo build --release&lt;&#x2F;code&gt;.
+But we are going to have Nix build this for us so that it can track the runtime
+dependencies. Therefore we need a &lt;code&gt;default.nix&lt;&#x2F;code&gt; file to describe the build
+process. Our &lt;code&gt;default.nix&lt;&#x2F;code&gt; build file looks like this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;nixpkgs&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{});
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rustPlatform&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;buildRustPackage &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello-rust&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildInputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cargo rustc &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;src &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is a shasum over our crate dependencies
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;cargoSha256 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1s4vg081ci6hskb3kk965nxnx384w8xb7n7yc4g93hj55qsk4vw5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Use this to figure out the correct Sha256
+  # cargoSha256 = lib.fakeSha256;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+    cargo build --release
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;checkPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;installPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+    mkdir -p $out&#x2F;bin
+    cp target&#x2F;release&#x2F;hello $out&#x2F;bin
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Breaking down the Nix expression: we specify what our inputs our to our
+build: &lt;code&gt;cargo&lt;&#x2F;code&gt; and &lt;code&gt;rustc&lt;&#x2F;code&gt;; we figure out what the sha256sum is of our crate
+dependencies; and we define some commands to build and install the executable.&lt;&#x2F;p&gt;
+&lt;p&gt;We can verify this works locally on our machine by running &lt;code&gt;nix-build .&lt;&#x2F;code&gt;
+(assuming you have Nix installed locally). You&#x27;ll end up with a symlink named
+result that points the compiled executable residing in &#x2F;nix&#x2F;store. Running
+&lt;code&gt;.&#x2F;result&#x2F;bin&#x2F;hello&lt;&#x2F;code&gt; should print &amp;quot;Hello, world!&amp;quot;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;docker-file&quot;&gt;Docker file&lt;&#x2F;h3&gt;
+&lt;p&gt;Now that we&#x27;ve built our Nix expression that defines how the code is built, we
+can add Docker to the mix. The goal is to have a builder stage that runs the
+nix-build command, then have a production stage that copies the executable and
+its runtime dependencies from builder. The production stage container will
+therefore have only the minimal amount of stuff needed to run.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Use nix as the builder
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; nixos&#x2F;nix:latest &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;AS &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Update the channel so we can get the latest packages
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-channel --update nixpkgs
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;
+WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;app
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Run the builder first without our code to fetch build dependencies.
+# This will fail, but that&amp;#39;s okay. We just want to have the build dependencies
+# cached as a layer. This is just a caching optimization that can be removed.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; default.nix .
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-build . || true
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; . .
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Now that our code is here we actually build it
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-build .
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Copy all the run time dependencies into &#x2F;tmp&#x2F;nix-store-closure
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir &#x2F;tmp&#x2F;nix-store-closure
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;echo &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Output references (Runtime dependencies):&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; $(nix-store -qR result&#x2F;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cp -R $(nix-store -qR result&#x2F;) &#x2F;tmp&#x2F;nix-store-closure
+
+ENTRYPOINT [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;sh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; ]
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Our production stage
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; scratch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;app
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Copy the runtime dependencies into &#x2F;nix&#x2F;store
+# Note we don&amp;#39;t actually have nix installed on this container. But that&amp;#39;s fine,
+# we don&amp;#39;t need it, the built code only relies on the given files existing, not
+# Nix.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;tmp&#x2F;nix-store-closure &#x2F;nix&#x2F;store
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;app&#x2F;result &#x2F;app
+CMD [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;app&#x2F;bin&#x2F;hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If we build this &lt;code&gt;Dockerfile&lt;&#x2F;code&gt; with &lt;code&gt;docker build .&lt;&#x2F;code&gt;, we&#x27;ll end up with an 33MB
+container. Compare this to a naive
+&lt;a href=&quot;https:&#x2F;&#x2F;gist.github.com&#x2F;MarcoPolo&#x2F;7953f1ca2691405b5b04659027967336&quot;&gt;Dockerfile&lt;&#x2F;a&gt;
+where we end up with a 624 MB container! That&#x27;s an order of magnitude smaller
+for a relatively simple change.&lt;&#x2F;p&gt;
+&lt;p&gt;Note that our executable has a shared library dependency on libc. Alpine
+linux doesn&#x27;t include libc, but this still works. How? When we build our code we
+reference the libc shared library stored inside &lt;code&gt;&#x2F;nix&#x2F;store&lt;&#x2F;code&gt;. Then when we copy
+the executable nix tells us that the libc shared library is also a dependency so
+we copy that too. Our executable uses only the libc inside &lt;code&gt;&#x2F;nix&#x2F;store&lt;&#x2F;code&gt; and
+doesn&#x27;t rely on any system provided libraries in &lt;code&gt;&#x2F;lib&lt;&#x2F;code&gt; or elsewhere.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;With a simple Nix build expression and the use of Docker&#x27;s multi stage builds we
+can use Docker&#x27;s strength of providing a consistent and portable environment
+with Nix&#x27;s fine grained dependency resolution to create a minimal production
+container.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-note-on-statically-linked-executables&quot;&gt;A note on statically linked executables&lt;&#x2F;h2&gt;
+&lt;p&gt;Yes, you could build the hello world example as a statically linked musl-backed
+binary. But that&#x27;s not the point. Sometimes code relies on a shared library, and
+it&#x27;s just not worth or impossible to convert it. The beauty of this system is
+that it doesn&#x27;t matter if the output executable is fully statically linked or
+not. It will work just the same and copy over the minimum amount of code needed
+for the production container to work.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-note-on-nix-s-dockertools&quot;&gt;A note on Nix&#x27;s dockerTools&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix proves a set of functions for creating Docker images:
+&lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;nixpkgs&#x2F;manual&#x2F;#sec-pkgs-dockerTools&quot;&gt;pkgs.dockerTools&lt;&#x2F;a&gt;. It&#x27;s
+very cool, and I recommend checking it. Unlike docker it produces
+deterministic images. Note, for all but the simplest examples, KVM is required.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-note-on-bazel-s-rules-docker&quot;&gt;A note on Bazel&#x27;s rules_docker&lt;&#x2F;h2&gt;
+&lt;p&gt;I don&#x27;t know much about this, but I&#x27;d assume this would be similar to what I&#x27;ve
+described. If you know more about this, please let me know!&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

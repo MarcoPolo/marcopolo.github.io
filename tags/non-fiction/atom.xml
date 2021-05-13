@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - non-fiction</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/non-fiction/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-02-22T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/non-fiction/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>A review of _No One At The Wheel_ by Samuel Schwartz</title>
+		<published>2019-02-22T00:00:00+00:00</published>
+		<updated>2019-02-22T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/books/no-one-at-the-wheel/" type="text/html"/>
+		<id>https://marcopolo.io/books/no-one-at-the-wheel/</id>
+		<content type="html">&lt;h1 id=&quot;no-one-at-the-wheel-driverless-cars-and-the-road-of-the-future&quot;&gt;No One At The Wheel: Driverless Cars and the road of the Future&lt;&#x2F;h1&gt;
+&lt;p&gt;I picked this book up after listening to Schwartz talk on &lt;em&gt;Fresh Air&lt;&#x2F;em&gt;. Schwartz
+is a traffic engineer, who worked at the chief traffic engineer for NYC. I was
+interested in this book because it adds a healthy dose of skepticism to all the
+hype I&#x27;ve heard about self-driving cars. I expected him to say &amp;quot;The future will
+be perfect, self driving cars will solve all our problems&amp;quot; or &amp;quot;The future is
+terrible, self driving cars will run over all the babies&amp;quot;. Instead, he was in an
+informed center. He acknowledges a lot of benefits AVs (autonomous vehicles) can
+bring, refutes some hollow claims from advocates, and points out several
+pitfalls to avoid.&lt;&#x2F;p&gt;
+&lt;p&gt;The book is an easy read and goes by quickly. I mostly listened to it,
+amusingly enough, from a drive from Montana to California (where I
+wished I had a self driving car to make the drive easier).&lt;&#x2F;p&gt;
+&lt;p&gt;Schwartz refutes some ideas about AVs that I thought were a given. First is
+that AVs, and AVs alone, will reduce traffic fatalities to nil. It&#x27;s true that
+AVs can introduce technology that will reduce traffic fatalities, but it is also
+true that &lt;strong&gt;right now&lt;&#x2F;strong&gt; we have that technology that we can incorporate in non
+self driving vehicles. Technologies like front collision warning (reduces accidents
+by 7%), automatic front collision braking (reduces accidents by 15%), and lane
+detection are available today. These technologies are shown to make driving
+safer, but they are only available on high end luxury vehicles. We have the
+power today to make the roads vastly safer overnight by passing legislation to
+make these safety features standard.&lt;&#x2F;p&gt;
+&lt;p&gt;The book warns of a dystopia future where everyone ones their own AV. In this
+world traffic is continually clogged and up to half of the cars in traffic are
+empty. People drive much more because it is that much easier. They sacrifice the
+exercise they would have gained in biking or walking by choosing the easier
+option of watching a movie while waiting in deadlock traffic. In this future,
+AVs are more like phones. A new model coming out every year or so, and people
+upgrading just as often. All the new production would have an obvious adverse
+effect on climate. Likewise the increase in traffic would be terrible for the
+environment.&lt;&#x2F;p&gt;
+&lt;p&gt;The happy future Schwartz talks about is a future where AVs work with traffic
+engineers to complement existing transit infrastructure. There could be AV
+buses that could run much more frequently on more routes 24&#x2F;7 that would extend
+existing public transit routes. Autonomous mini buses can be used to create a
+route on demand for the rush hour commuters to bring them to a bigger transit
+hub (e.g. a subway). Smaller AVs can then be used in the off hours to get people
+to their nearest transit hub, thus solving the last mile problem.&lt;&#x2F;p&gt;
+&lt;p&gt;Schwartz sprinkles his book with parallels from the time cars where first
+introduced. Roads where first made for cyclist. Cyclist were lobbying for more
+roads around the time cars were being introduced. As cars became more ubiquitous
+and faster, bicyclist and pedestrians were kicked off the roads and
+criminalized. Roads took over and changed our cities into desolate avenues with
+drivers careening through city centers at 40mph. Schwartz argues, and I&#x27;m
+inclined to agree, we cannot let AVs push everyone else as second class
+citizens. We are at an inflection point where we can define legislation to
+prioritize pedestrians and city life.&lt;&#x2F;p&gt;
+&lt;p&gt;I would recommend &lt;a href=&quot;https:&#x2F;&#x2F;smile.amazon.com&#x2F;dp&#x2F;B07B8JGG5M&#x2F;ref=dp-kindle-redirect?_encoding=UTF8&amp;amp;btkr=1&amp;amp;sa-no-redirect=1&quot;&gt;this book&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	
+	<entry xml:lang="en">
+		<title>Thoughts on _The Craftsman_ by Richard Sennet</title>
+		<published>2019-02-21T00:00:00+00:00</published>
+		<updated>2019-02-21T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/books/the-craftsman-sennet/" type="text/html"/>
+		<id>https://marcopolo.io/books/the-craftsman-sennet/</id>
+		<content type="html">&lt;p&gt;I&#x27;ve finished my second read through of &lt;em&gt;The Craftsman&lt;&#x2F;em&gt;. It&#x27;s an argument that
+craftsman are more capable than society gives than credit for. The notion of
+&lt;em&gt;animal laborens&lt;&#x2F;em&gt;, that man is simply a thoughtless animal, is wrong in Sennet&#x27;s
+view. He argues that we think deeply when we work with our hands. The woodworker
+isn&#x27;t just idly planing away at the wood she&#x27;s working on. She looks at the
+grain, analyzes the constraints of the material, and is constantly problem
+solving &lt;em&gt;and&lt;&#x2F;em&gt; problem finding. The same applies to programmers. Fixing bugs is
+never a simple tasks. Often it challenges both our problem solving and problem
+finding abilities.&lt;&#x2F;p&gt;
+&lt;p&gt;Sennet decorates his book with interesting case studies. The skill involved in
+using a Chinese cleaver or the expressive metaphorical recipe of how to cook a
+specific chicken dish are a couple of memorable examples. Sennet analyzes the
+history of the craftsman from ancient times to today, and how the industrial
+revolution has changed the scene. He asks Voltaire, with his encyclopedia, for
+his thoughts to accompany his own. Voltaire understood the superiority of machines
+in certain craft tasks, but felt it wasn&#x27;t fair to the craftsman to focus only
+on that superiority. The craftsman has the ability through problem solving and
+problem finding to use these new machines as tools.&lt;&#x2F;p&gt;
+&lt;p&gt;I found the story of &amp;quot;honest&amp;quot; bricks especially interesting. There was a time
+when the only way to make bricks was the artisanal and very labor intensive way.
+The bricks in these cases all came out slightly different and imbued with colors
+that represented the geographic origin and creators. Then came a more industrial
+form of creating bricks. This process created many bricks at uniform sizes and
+colors very cheaply. At this point people started to personify the bricks. They
+called bricks &amp;quot;honest&amp;quot; when they were hand made with blemishes that reflect
+their creation. No one doubted that the industrial bricks where objectively
+better, but there was still a considerable demand for these honest bricks. The
+industrial process eventually came up with ways to emulate more characteristics
+of the honest brick, such as modifying the colors of the bricks to mirror those
+of bricks from smaller towns. Even though this happened several hundred years
+ago and in another country, I think it&#x27;s very easy to relate to this story.
+We are essentially reliving this, but with everything.&lt;&#x2F;p&gt;
+&lt;p&gt;The myth of Pandora and Hephaestus are brought again and again throughout the
+book. The myths highlight the paradox in craft and society. Hephaestus was a
+skilled craftsman but an ugly person (born with a club foot). Pandora, a
+beautiful goddess with a box of ugly and evil things. The myths are the original
+prototype of society&#x27;s fears and beliefs on crafts. Frankenstein is a more modern
+version of Pandora&#x27;s box. Parts of the movie &lt;em&gt;Jiro Dreams of Sushi&lt;&#x2F;em&gt; is our
+modern &lt;em&gt;Hymn to Hephaestus&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;I think the book is unbelievably fascinating in so many ways. It reminds me of
+when I heard &lt;em&gt;Marian Hill&lt;&#x2F;em&gt; for the first time. I didn&#x27;t even realize music could
+sound that way. I was so happy to have discovered a whole new facet of life that
+I didn&#x27;t even know existed. The book is the same way. Every chapter introduces
+some thought or history that I never knew existed. Each page was like Christmas.
+A nice gift from Sennet.&lt;&#x2F;p&gt;
+&lt;p&gt;I only have a few issues with the book. The biggest one is likely it&#x27;s weight
+on the idea that a society of skilled craftsmen could result in a society closer
+to self governance. An idea close to Jefferson. Perhaps it&#x27;s because I&#x27;ve been
+reading Ron Chernow&#x27;s Hamilton biography, but I&#x27;m primed to be suspect of
+Jefferson&#x27;s political theories. I&#x27;m surprised by Sennet&#x27;s belief here as he
+classifies a lot of somewhat surprising things as crafts (parenting, experience,
+etc.), but doesn&#x27;t seem to classify governance and politics as a craft.&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s a great book, and I&#x27;d recommend it. I was introduced to it from Paul
+Sellers. Here&#x27;s an excerpt of his thoughts on it.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;I read an article about skilled artisans producing designs and selling their
+wares to mainstream in a recent weekend issue of the Observer written by Emma
+Love. In two minutes I thought to myself this surely has to be a joke. ... It
+was filled with journalistic drivel where she used stock phrases of the day like
+“Traditional skills”, “Tapping into the wider trend for natural materials,”.
+What she didn’t see was that most of the goods were highly over priced and none
+of them used traditional skills anywhere.&lt;&#x2F;p&gt;
+&lt;p&gt;I wish that this journalist read a little more. I wish she had read this book
+beforehand, perhaps she might have at least understood she didn’t understand;
+that she couldn’t understand. Richard Sennett’s book is a well researched
+masterpiece, unpretentious in every sphere and should be mandatory reading for
+any and all craft students and mentored apprentices true to their craft. Sennett
+carefully crafts his sentences with depth and meaning of an artisan, and whereas
+I might not agree with every single word, I do see that he worked extremely
+diligently to open the world Pandora left to get a point of view in place first
+and then blasted through the myths and mysteries of why we do what we do, why
+penchants exist as yearnings beyond our understandings and why, when we are
+young, we should indeed listen to our hearts.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;from &lt;a href=&quot;https:&#x2F;&#x2F;paulsellers.com&#x2F;2018&#x2F;03&#x2F;theres-a-book-you-should-read&#x2F;&quot;&gt;There&#x27;s a book you should read&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>MarcoPolo - Partially Functional</title>
+    <meta name="viewport" content="width=device-width" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css" />
+
+    <!-- syntax highlighting CSS -->
+    <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
+    <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
+    
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="site">
+        <div class="header">
+          <h2 class="title" style="display: inline;"><a href="/">MarcoPolo - <span>Partially Functional</span></a>
+          </h2>
+        </div>
+
+        
+<header>
+  <h2>Introducing Servant, a Clojurescript library for web workers</h2>
+  
+  <p class="meta">Oct  1, 2013</p>
+</header>
+
+<!-- <div class="postWrapper">
+  <div class="leftBumper"></div> -->
+<main>
+  <aside></aside>
+  <article class="post">
+    
+    <h1 id="concurrent-programming">Concurrent Programming</h1>
+<p>Javascript by default is single threaded, but web workers introduce
+OS level threads. Concurrent programming is hard enough (in imperative
+languages), so the webworker designers decided to circumvent a bunch of
+concurrency problems by forbidding any shared data between threads. There are
+better ways of doing this (read <em>immutability</em>), but we work with what we got.</p>
+<p><br></br></p>
+<h1 id="problems-with-web-workers">Problems with web workers</h1>
+<p>I've done a couple projects with web workers. The biggest project being
+<a href="http://cryptic.io">Cryptic.io</a>, which uses webworkers to efficiently
+encrypt/decrypt large (GBs) files, and parallel {down,up}load file chunks. Here
+are problems I've stumbled across:</p>
+<ul>
+<li>Everything about the web worker needs to be asynchronous, meaning callback hell</li>
+<li>You need to think in a separate context for the web worker, you can't call any functions defined with the rest of your code.</li>
+<li>Distributing workload effectively.</li>
+<li>The problems only gets worse the more web workers you bring in.</li>
+</ul>
+<br />
+<h1 id="enter-servant">Enter Servant</h1>
+<p><a href="https://github.com/marcopolo/servant">Servant</a> is a super small (literally ~100 lines) library that solves all the
+problems above, allowing you to write clean, multithreaded, ClojureScript. Even
+though it's small, it does a lot.</p>
+<ul>
+<li>It allows you to define servant functions alongside the rest of your code, even using functions already defined in your
+namespace.</li>
+<li>It automatically balances work across webworkers.</li>
+<li>It provides simple ways to do a normal (copy of arguments) or efficient (arraybuffer transfer) call
+to webworkers, easily.</li>
+</ul>
+<h1 id="sharing-functions-and-predefined-variables">Sharing functions, and predefined variables</h1>
+<p>This was the trickiest part of the library. I wanted the ability to define
+useful functions, and use them in the webworker without having to copy it over
+to a separate worker.js file. I solved it by using the same exact file for both
+the main page (browser context) and the web worker. That, however, came with one
+problem; you have to explicitly declare code that should run on the webworker
+and code that runs in the browser. Like so:</p>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">ns</span><span style="color:#c0c5ce;"> servant.demo
+  (</span><span style="color:#d08770;">:require </span><span style="color:#c0c5ce;">[servant.core </span><span style="color:#d08770;">:as</span><span style="color:#c0c5ce;"> servant]
+            [servant.worker </span><span style="color:#d08770;">:as</span><span style="color:#c0c5ce;"> worker]))
+
+(</span><span style="color:#b48ead;">defn </span><span style="color:#8fa1b3;">window-load </span><span style="color:#c0c5ce;">[] (</span><span style="color:#bf616a;">.log</span><span style="color:#c0c5ce;"> js/console &quot;</span><span style="color:#a3be8c;">this runs in the browser</span><span style="color:#c0c5ce;">&quot;))
+
+(</span><span style="color:#bf616a;">if </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">servant/webworker?</span><span style="color:#c0c5ce;">)
+    (</span><span style="color:#bf616a;">worker/bootstrap</span><span style="color:#c0c5ce;">) </span><span style="color:#65737e;">;;Sets the worker up to receive messages
+    (set! (.-onload js/window) window-load))
+</span></code></pre>
+<p>As part of that caveat, the webworker can only see code that it can get to.
+Anything defined in window-load would not be visible to the webworker. Now let's
+take a look at how we can define a servant function, using the <code>defservantfn</code>
+macro.</p>
+<p>We need to use a special function, <code>defservantfn</code> to define functions that will
+serve as our &quot;access points&quot; to the web worker.</p>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">ns</span><span style="color:#c0c5ce;"> servant.demo
+  (</span><span style="color:#d08770;">:require-macros </span><span style="color:#c0c5ce;">[servant.macros </span><span style="color:#d08770;">:refer </span><span style="color:#c0c5ce;">[defservantfn]]))
+
+(</span><span style="color:#b48ead;">defn </span><span style="color:#8fa1b3;">make-it-funny </span><span style="color:#c0c5ce;">[not-funny]
+  (</span><span style="color:#bf616a;">str </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">Hahahah:</span><span style="color:#c0c5ce;">&quot; not-funny))
+
+(</span><span style="color:#b48ead;">defservantfn </span><span style="color:#8fa1b3;">servant-with-humor </span><span style="color:#c0c5ce;">[your-joke]
+    (</span><span style="color:#bf616a;">make-it-funny</span><span style="color:#c0c5ce;"> your-joke))
+</span></code></pre>
+<p>The <code>defservantfn</code> macro simply calls a defn with the
+same arguments, and registers that function with a hashmap atom for the
+webworker. The key is the hash of the function and the value is the function
+itself. The webworker needs to be able to know what function the browser is
+referring in a message, so I use the function's hash as a token that
+the browser context and webworker can both agree on. The function's
+<code>.toString()</code> value could have worked just as well.</p>
+<p>I should also mention, for efficiency reasons, Servant keeps a pool of N
+webworkers (you specify N) alive (until you explicitly kill them) so you only
+pay for the webworkers once. You control when the webworkers are created with
+<code>servant/spawn-servants</code>.</p>
+<h1 id="workload-balancing">Workload Balancing</h1>
+<p>Core.async is simply amazing, it took this tricky problem and made it trivial. The solution is 4 lines.
+The solution for Servant is:</p>
+<ul>
+<li>spawn N number of workers and place them in a buffered (of size N) channel.</li>
+<li>Take workers from the channel as you use them.</li>
+<li>Put them back when you get your result.</li>
+</ul>
+<p>This is so beautifully simple. I just write the behavior I want, and core.async
+handles the messy state. If all the webworkers are busy the code will &quot;block&quot;
+until a webworker is free. What this means for you as a user, is you don't have
+to think about which worker is available to run your code.</p>
+<h1 id="configurable-message-types">Configurable message types</h1>
+<p>Now the whole point of using webworkers is to be as fast as possible. Sometimes
+you can't even afford copying data to the webworker (especially if the data is
+big, like at <a href="http://cryptic.io">Cryptic.io</a>). Servant provides a way to access
+webworkers' nifty <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/Performance/Using_web_workers#Passing_data_by_transferring_ownership_(transferable_objects)">arraybuffer transfer context ability</a>.
+Take for example:</p>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">defservantfn </span><span style="color:#8fa1b3;">get-first-4bytes-as-str </span><span style="color:#c0c5ce;">[arraybuffer]
+  (</span><span style="color:#bf616a;">let </span><span style="color:#c0c5ce;">[d (</span><span style="color:#bf616a;">js/DataView.</span><span style="color:#c0c5ce;"> arraybuffer)]
+      (</span><span style="color:#bf616a;">.toString </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">.getUint32</span><span style="color:#c0c5ce;"> d </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">) </span><span style="color:#d08770;">16</span><span style="color:#c0c5ce;">)))
+</span></code></pre>
+<p>That function expects an arraybuffer and returns a string. If we wanted to be
+efficient about it (and didn't care about getting rid of the arraybuffer) we can
+make the call using the <code>servant/array-buffer-message-standard-reply</code> fn instead
+of the <code>servant/standard-message</code>. So the efficient result would be:</p>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">arraybuffer </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">js/ArrayBuffer. </span><span style="color:#d08770;">10</span><span style="color:#c0c5ce;">))
+(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">d </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">js/DataView.</span><span style="color:#c0c5ce;"> arraybuffer))
+(</span><span style="color:#bf616a;">.setUint32</span><span style="color:#c0c5ce;"> d </span><span style="color:#d08770;">0 0xdeadbeef</span><span style="color:#c0c5ce;">)
+(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">result-channel
+  </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">servant/servant-thread</span><span style="color:#c0c5ce;">
+    servant-channel
+    servant/array-buffer-message-standard-reply
+    get-first-4bytes-as-str arraybuffer [arraybuffer]))
+</span></code></pre>
+<p>The arguments to servant-thread are:</p>
+<ul>
+<li><code>servant-channel</code> - channel that contains the available workers</li>
+<li><code>servant/array-buffer-message-standard-reply</code> - A function that defines how the <code>.postMessage</code> function will be called (a.k.a mesage-fn)</li>
+<li><code>get-first-4bytes-as-str</code> - The servant function we defined earlier</li>
+<li><code>arraybuffer</code> - our argument to the function</li>
+<li><code>[arraybuffer]</code> - a vector of arraybuffers that are going to be transferred</li>
+</ul>
+<p>The message-fn can be anything, but I think servant has you covered with:</p>
+<ul>
+<li><code>standard-message</code> : Copies all the data both ways</li>
+<li><code>array-buffer-message</code> : <em>Can</em> transfer the context both ways</li>
+<li><code>array-buffer-message-standard-reply</code> : <em>Can</em> transfer the context when making the call, <em>won't</em> transfer the context coming back</li>
+</ul>
+<p>There is a reason why array-buffer-message isn't just the standard. You need to
+explicitly tell the postMessage call that you want to transfer arraybuffers. So
+to transfer context you need an additional argument, an array of arraybuffers.
+You also need to make sure the defservantfn returns a vector of results and an
+array of arraybuffers [result [arraybuffer1]] if you want to transfer the
+arraybuffer from the worker to the browser context. I figured if you wanted
+that you could use it and deal with the extra argument, if you didn't you could
+write your functions how you normally would.</p>
+<h1 id="examples">Examples</h1>
+<p>I wrote two examples using the servant library:</p>
+<ul>
+<li>The first is a <a href="https://github.com/MarcoPolo/servant-demo">simple demo</a> showing several use cases.</li>
+<li>The next is more featured demo that can encrypt/decrypt large files efficiently using webworkers.</li>
+</ul>
+<h1 id="last-thoughts">Last thoughts</h1>
+<p>I used to curse the name webworkers. They brought gifts of speed at the cost of
+complexity. Servant is different, it doesn't sacrifice simplicity or
+efficiency. I'm pretty excited at the ease of using webworkers with servant, and
+I hope you have fun making an amazing, multithreaded Clojurescript application!</p>
+<br />
+
+  </article>
+  <aside></aside>
+</main>
+  <!-- <div class="leftBumper"></div>
+</div> -->
+
+
+        <div class="footer">
+          <div class="contact">
+            <div class="std-highlight">
+              <pre>
+                    <code class="clojure language-clojure" data-lang="clojure">
+<span class="p">(</span><span class="k">def </span> <span class="nv">Marco-Munizaga</span>
+      <span class="p">{</span><span class="ss">:email</span> <span class="p">(</span><span class="nb">str </span><span class="s">"marco"</span> <span class="s">"@"</span> <span class="s">"marcopolo.io"</span><span class="p">)</span>
+       <span class="ss">:github</span> <span class="s"><a href="https://github.com/marcopolo">github.com/marcopolo</a></span>
+       <span class="ss">:keybase</span> <span class="s"><a
+       href="https://keybase.io/marcopolo">marcopolo</a></span> <span class="p">}</span><span class="p">)</span>
+       <span class="ss">:rss</span> <span class="s"><a
+       href="https://marcopolo.io/code/servant-cljs/atom.xml">atom.xml</a></span> <span class="p">}</span><span class="p">)</span>
+                    </code>
+                  </pre>
+            </div>
+
+            <p> </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

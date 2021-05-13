@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - cryptic</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/cryptic/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-03-24T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/cryptic/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Simple Declarative VMs</title>
+		<published>2021-03-24T00:00:00+00:00</published>
+		<updated>2021-03-24T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/simple-vms/" type="text/html"/>
+		<id>https://marcopolo.io/code/simple-vms/</id>
+		<content type="html">&lt;p&gt;I&#x27;ve been on a hunt to find a simple and declarative way to define VMs. I wanted
+something like &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;nixos&#x2F;stable&#x2F;#ch-containers&quot;&gt;NixOS
+Containers&lt;&#x2F;a&gt;, but with a
+stronger security guarantee. I wanted to be able to use a Nix expression to
+define what the VM should look like, then reference that on my Server&#x27;s
+expression and have it all work automatically. I didn&#x27;t want to manually
+run any commands. The hunt is over, I finally found it.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;my-use-case&quot;&gt;My Use Case&lt;&#x2F;h2&gt;
+&lt;p&gt;I want a machine that I can permanently hook up to a WireGuard VPN and treat
+as if it were in a remote place. At first I did this with a physical machine,
+but I didn&#x27;t want to commit the whole machine&#x27;s compute for a novelty. What I
+really want is a small VM that is permanently hooked up to a WireGuard VPN.
+Minimal investment with all the upsides.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nixos-qemu&quot;&gt;NixOS QEMU&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix OS supports building your system in a QEMU runnable environment right out of
+the box. &lt;code&gt;nixos-rebuild build-vm&lt;&#x2F;code&gt; is a wrapper over &lt;code&gt;nix build github:marcopolo&#x2F;marcopolo.github.io#nixosConfigurations.small-vm.config.system.build.vm&lt;&#x2F;code&gt;. (Side note, with
+flakes you can build this exact VM by running that command&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;). This means NixOS
+already did the hard work of turning a NixOS configuration into a valid VM that
+can be launched with QEMU. Not only that, but the VM shares the &lt;code&gt;&#x2F;nix&#x2F;store&lt;&#x2F;code&gt;
+with the host. This results in a really small VM (disk size is 5MB).&lt;&#x2F;p&gt;
+&lt;p&gt;NixOS does the heavy lifting of converting a configuration into a script that
+will run a VM, so all I need to do is write a service that manages this process.
+Enter &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;simple-vms&#x2F;&quot;&gt;simple-vms&lt;&#x2F;a&gt;, heavily inspired by
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Nekroze&#x2F;vms.nix&quot;&gt;vms.nix&lt;&#x2F;a&gt; and
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Mic92&#x2F;nixos-shell&quot;&gt;nixos-shell&lt;&#x2F;a&gt;. &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;simple-vms&#x2F;&quot;&gt;simple-vms&lt;&#x2F;a&gt; is a NixOS
+module that takes in a reference to the
+&lt;code&gt;nixosConfigurations.small-vm.config.system.build.vm&lt;&#x2F;code&gt; derivation and the
+option of whether you want state to be persisted, and defines a Systemd
+service for the vm (There can be multiple VMs). This really is a simple
+module, the NixOS service definition is about 10 lines long, and its
+&lt;code&gt;ExecStart&lt;&#x2F;code&gt; is simply:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir -p &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+cd &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+exec ${cfg.vm.out}&#x2F;bin&#x2F;run-nixos-vm;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With this service we can get and keep our VMs up and running.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;stateless-vms&quot;&gt;Stateless VMs&lt;&#x2F;h2&gt;
+&lt;p&gt;I got a sticker recently that said &amp;quot;You either have one source of truth, of
+multiple sources of lies.&amp;quot; To that end, I wanted to make my VM completely
+stateless. QEMU lets you mount folders into the VM, so I used that to mount host
+folders in the VM&#x27;s &lt;code&gt;&#x2F;etc&#x2F;wireguard&lt;&#x2F;code&gt; and &lt;code&gt;&#x2F;etc&#x2F;ssh&lt;&#x2F;code&gt; so that the host can
+provide the VM with WireGuard keys, and the VM can persist it&#x27;s SSH host keys.&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s all the VM really needs. Every time my VM shuts down I delete the drive.
+And just to be safe, I try deleting any drive on boot too.&lt;&#x2F;p&gt;
+&lt;p&gt;If you&#x27;re running a service on the VM, you&#x27;ll likely want to persist that
+service&#x27;s state files too in a similar way.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;fin&quot;&gt;Fin&lt;&#x2F;h2&gt;
+&lt;p&gt;That&#x27;s it. Just a small post for a neat little trick. If you set this up let
+me know! I&#x27;m interested in hearing your use case.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;footnotes&quot;&gt;Footnotes&lt;&#x2F;h3&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;User&#x2F;pass = root&#x2F;root. Exit qemu with C-a x.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+	</entry>
+	
+	<entry xml:lang="en">
+		<title>Backups made simple</title>
+		<published>2021-03-07T00:00:00+00:00</published>
+		<updated>2021-03-07T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/backups-made-simple/" type="text/html"/>
+		<id>https://marcopolo.io/code/backups-made-simple/</id>
+		<content type="html">&lt;p&gt;I&#x27;ve made a backup system I can be proud of, and I&#x27;d like to share it with you
+today. It follows a philosophy I&#x27;ve been fleshing out called &lt;em&gt;The
+Functional Infra&lt;&#x2F;em&gt;. Concretely it aims to:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Be pure. An output should only be a function of its inputs.&lt;&#x2F;li&gt;
+&lt;li&gt;Be declarative and reproducible. A by product of being pure.&lt;&#x2F;li&gt;
+&lt;li&gt;Support rollbacks. Also a by product of being pure.&lt;&#x2F;li&gt;
+&lt;li&gt;Surface actionable errors. The corollary being it should be easy to understand
+and observe what is happening.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;At a high level, the backup system works like so:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;ZFS creates automatic snapshots every so often.&lt;&#x2F;li&gt;
+&lt;li&gt;Those snapshots are replicated to an EBS-backed EC2 instance that is only
+alive while backup replication is happening. Taking advantage of ZFS&#x27;
+incremental snapshot to make replication generally quite fast.&lt;&#x2F;li&gt;
+&lt;li&gt;The EBS drive itself stays around after the instance is terminated. This
+drive is a Cold HDD (sc1) which costs about $0.015 gb&#x2F;month.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;zfs&quot;&gt;ZFS&lt;&#x2F;h2&gt;
+&lt;p&gt;To be honest I haven&#x27;t used ZFS all that much, but that&#x27;s kind of my point. I,
+as a non-expert in ZFS, have been able to get a lot out of it just by
+following the straightforward documentation. It seems like the API is well
+thought out and the semantics are reasonable. For example, a consistent snapshot
+is as easy as doing &lt;code&gt;zfs snapshot tank&#x2F;home&#x2F;marco@friday&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;automatic-snapshots&quot;&gt;Automatic snapshots&lt;&#x2F;h3&gt;
+&lt;p&gt;On NixOS setting up automatic snapshots is a breeze, just add the following to
+your NixOS Configuration:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;zfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;autoSnapshot&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;and setting the &lt;code&gt;com.sun:auto-snapshot&lt;&#x2F;code&gt; option on the filesystem. E.g.: &lt;code&gt;zfs set com.sun:auto-snapshot=true &amp;lt;pool&amp;gt;&#x2F;&amp;lt;fs&amp;gt;&lt;&#x2F;code&gt;. Note that this can also be done on
+creation of the filesystem: &lt;code&gt;zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true tank&#x2F;home&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;With that enabled, ZFS will keep a snapshot for the latest 4 15-minute, 24
+hourly, 7 daily, 4 weekly and 12 monthly snapshots.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;on-demand-ec2-instance-for-backups&quot;&gt;On Demand EC2 Instance for Backups&lt;&#x2F;h3&gt;
+&lt;p&gt;Now that we&#x27;ve demonstrated how to setup snapshotting, we need to tackle the
+problem of replicating those snapshots somewhere so we can have real backups.
+For that I use one of my favorite little tools:
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;stephank&#x2F;lazyssh&quot;&gt;lazyssh&lt;&#x2F;a&gt;. Its humble description betrays
+little information at its true usefulness. The description is simply:
+&lt;em&gt;A jump-host SSH server that starts machines on-demand&lt;&#x2F;em&gt;. What it enables is
+pretty magical. It essentially lets you run arbitrary code when something SSHs
+through the jump-host.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s take the classic ZFS replication example from the
+&lt;a href=&quot;https:&#x2F;&#x2F;docs.oracle.com&#x2F;cd&#x2F;E18752_01&#x2F;html&#x2F;819-5461&#x2F;gbchx.html&quot;&gt;docs&lt;&#x2F;a&gt;:
+&lt;code&gt;host1# zfs send tank&#x2F;dana@snap1 | ssh host2 zfs recv newtank&#x2F;dana&lt;&#x2F;code&gt;. This
+command copies a snapshot from a machine named &lt;code&gt;host1&lt;&#x2F;code&gt; to another machine named
+&lt;code&gt;host2&lt;&#x2F;code&gt; over SSH. Simple and secure backups. But it relies on &lt;code&gt;host2&lt;&#x2F;code&gt; being
+available. With &lt;code&gt;lazyssh&lt;&#x2F;code&gt; we can make &lt;code&gt;host2&lt;&#x2F;code&gt; only exist when needed.
+&lt;code&gt;host2&lt;&#x2F;code&gt; would start when the ssh command is invoked and terminated when the ssh
+command finishes. The command with &lt;code&gt;lazyssh&lt;&#x2F;code&gt; would look something like this
+(assuming you have a &lt;code&gt;lazyssh&lt;&#x2F;code&gt; target in your &lt;code&gt;.ssh&#x2F;config&lt;&#x2F;code&gt; as explained in the
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;stephank&#x2F;lazyssh&quot;&gt;docs&lt;&#x2F;a&gt;):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;host1# zfs send tank&#x2F;dana@snap1 | ssh -J lazyssh host2 zfs recv newtank&#x2F;dana
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note the only difference is the &lt;code&gt;-J lazyssh&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;So how do we actually setup &lt;code&gt;lazyssh&lt;&#x2F;code&gt; to do this? Here is my configuration:&lt;&#x2F;p&gt;
+&lt;div &gt;
+    &lt;script src=&quot;https:&amp;#x2F;&amp;#x2F;gist.github.com&amp;#x2F;MarcoPolo&amp;#x2F;13462e986711f62bfc6b7b8e494c5cc8.js&quot;&gt;&lt;&#x2F;script&gt;
+&lt;&#x2F;div&gt;
+&lt;p&gt;Note there are a couple of setup steps:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create the initial sc1 EBS Drive. I did this in the AWS Console, but you
+could do this in Terraform or the AWS CLI.&lt;&#x2F;li&gt;
+&lt;li&gt;Create the ZFS pool on the drive. I launched my lazy archiver without the ZFS
+filesystem option and ran: &lt;code&gt;zpool create -o ashift=12 -O mountpoint=none POOL_NAME &#x2F;dev&#x2F;DRIVE_LOCATION&lt;&#x2F;code&gt;. Then I created the
+&lt;code&gt;POOL_NAME&#x2F;backup&lt;&#x2F;code&gt; dataset with &lt;code&gt;zfs create -o acltype=posixacl -o xattr=sa -o mountpoint=legacy POOL_NAME&#x2F;backup&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;As a quality of life and security improvement I setup
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nix-community&#x2F;home-manager&quot;&gt;homemanager&lt;&#x2F;a&gt; to manage my SSH
+config and known_hosts file so these are automatically correct and properly
+setup. I generate the lines for known_hosts when I generate the host keys
+that go in the &lt;code&gt;user_data&lt;&#x2F;code&gt; field in the &lt;code&gt;lazsyssh-config.hcl&lt;&#x2F;code&gt; above. Here&#x27;s the
+relevant section from my homemanager config:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;programs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;ssh &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# I keep this file tracked in Git alongside my NixOS configs.
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;userKnownHostsFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;path&#x2F;to&#x2F;known_hosts&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;matchBlocks &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
+      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;user &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hostname &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;proxyJump &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lazyssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_AWS_KEYPAIR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+      };
+
+      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lazyssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This assume you are running lazyssh locally, but it can also
+        # reference another machine.
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hostname &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;localhost&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;port &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;7922&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;user &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;jump&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_LAZYSSH_CLIENT_KEY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identitiesOnly &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;extraOptions &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
+          &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PreferredAuthentications&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;publickey&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        };
+      };
+    };
+  };
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Finally, I use the provided NixOS Module for &lt;code&gt;lazyssh&lt;&#x2F;code&gt; to manage starting it and
+keeping it up. Here&#x27;s the relevant parts from my &lt;code&gt;flake.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  # My fork that supports placements and terminating instances after failing to
+  # attach volume.
+  inputs.lazyssh.url = &amp;quot;github:marcopolo&#x2F;lazyssh&#x2F;attach-volumes&amp;quot;;
+  inputs.lazyssh.inputs.nixpkgs.follows = &amp;quot;nixpkgs&amp;quot;;
+
+    outputs =
+    { self
+    , nixpkgs
+    , lazyssh
+    }: {
+      nixosConfigurations = {
+
+        nixMachineHostName = nixpkgs.lib.nixosSystem {
+          system = &amp;quot;x86_64-linux&amp;quot;;
+          modules = [
+              {
+                imports = [lazyssh.nixosModule]
+                services.lazyssh.configFile =
+                  &amp;quot;&#x2F;path&#x2F;to&#x2F;lazyssh-config.hcl&amp;quot;;
+                # You&amp;#39;ll need to add the correct AWS credentials to `&#x2F;home&#x2F;lazyssh&#x2F;.aws`
+                # This could probably be a symlink with home-manager to a
+                # managed file somewhere else, but I haven&amp;#39;t go down that path
+                # yet
+                users.users.lazyssh = {
+                  isNormalUser = true;
+                  createHome = true;
+                };
+              }
+          ];
+        };
+      };
+    }
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With all that setup, I can ssh into the archiver by simple running &lt;code&gt;ssh archiver&lt;&#x2F;code&gt;. Under the hood, &lt;code&gt;lazyssh&lt;&#x2F;code&gt; starts the EC2 instance and attaches the
+EBS drive to it. And since &lt;code&gt;ssh archiver&lt;&#x2F;code&gt; works, so does the original example
+of: &lt;code&gt;zfs send tank&#x2F;dana@snap1 | ssh archiver zfs recv newtank&#x2F;dana&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;automatic-replication&quot;&gt;Automatic Replication&lt;&#x2F;h2&gt;
+&lt;p&gt;The next part of the puzzle is to have backups happen automatically. There are
+various tools you can use for this. Even a simple cron that runs the &lt;code&gt;send&#x2F;recv&lt;&#x2F;code&gt;
+on a schedule. I opted to go for what NixOS supports out of the box, which is
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;alunduil&#x2F;zfs-replicate&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;alunduil&#x2F;zfs-replicate&lt;&#x2F;a&gt;.
+Unfortunately, I ran into a couple issues that led me to make a fork. Namely:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Using &lt;code&gt;&#x2F;usr&#x2F;bin&#x2F;env - ssh&lt;&#x2F;code&gt; fails to use the ssh config file. My fork supports
+specifying a custom ssh binary to use.&lt;&#x2F;li&gt;
+&lt;li&gt;Support for &lt;code&gt;ExecStartPre&lt;&#x2F;code&gt;. This is to &amp;quot;warm up&amp;quot; the archiver instance. I run
+&lt;code&gt;nixos-rebuild switch&lt;&#x2F;code&gt; which is basically a no-op if there is no changes to
+apply from the configuration file, or blocks until the changes have been
+applied. In my case these are usually the changes inside the UserData field.&lt;&#x2F;li&gt;
+&lt;li&gt;Support for &lt;code&gt;ExecStopPost&lt;&#x2F;code&gt;. This is to add observability to this process.&lt;&#x2F;li&gt;
+&lt;li&gt;I wanted to raise the systemd timeout limit. In case the &lt;code&gt;ExecStartPre&lt;&#x2F;code&gt; takes
+a while to warm-up the instance.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Thankfully with flakes, using my own fork was painless. Here&#x27;s the relevant
+section from my &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# inputs.zfs-replicate.url = &amp;quot;github:marcopolo&#x2F;zfs-replicate&#x2F;flake&amp;quot;;
+  # ...
+  # Inside nixosSystem modules...
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;pkgs, ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;:
+    {
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;imports &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;zfs-replicate&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixosModule &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Disable the existing module
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;disabledModules &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;services&#x2F;backup&#x2F;zfs-replication.nix&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; ];
+
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;zfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;autoReplication &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;=
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;host &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sshPath &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;openssh&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;ssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Make sure the machine is up-to-date
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStartPre &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;sshPath&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;} ${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;host&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; nixos-rebuild switch&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;honeycombAPIKey &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;secrets.nix&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;honeycomb_api_key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;honeycombCommand &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;writeScriptBin &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;reportResult&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+            #!&#x2F;usr&#x2F;bin&#x2F;env &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;bash&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;bash
+            &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;curl&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;curl https:&#x2F;&#x2F;api.honeycomb.io&#x2F;1&#x2F;events&#x2F;zfs-replication -X POST \
+              -H &amp;quot;X-Honeycomb-Team: &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;honeycombAPIKey&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;quot; \
+              -H &amp;quot;X-Honeycomb-Event-Time: $(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;coreutils&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;date -u +&amp;quot;%Y-%m-%dT%H:%M:%SZ&amp;quot;)&amp;quot; \
+              -d &amp;quot;{\&amp;quot;serviceResult\&amp;quot;:\&amp;quot;$SERVICE_RESULT\&amp;quot;, \&amp;quot;exitCode\&amp;quot;: \&amp;quot;$EXIT_CODE\&amp;quot;, \&amp;quot;exitStatus\&amp;quot;: \&amp;quot;$EXIT_STATUS\&amp;quot;}&amp;quot;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStopPost &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;honeycombCommand&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;reportResult&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;inherit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStartPre execStopPost host sshPath&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;timeout &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;90000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;username &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;localFilesystem &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rpool&#x2F;safe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;remoteFilesystem &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rpool&#x2F;backup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFilePath &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_AWS_KEY_PAIR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        };
+    })
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That sets up a systemd service that runs after every snapshot. It also
+reports the result of the replication to
+&lt;a href=&quot;https:&#x2F;&#x2F;www.honeycomb.io&#x2F;&quot;&gt;Honeycomb&lt;&#x2F;a&gt;, which brings us to our next
+section...&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;observability&quot;&gt;Observability&lt;&#x2F;h2&gt;
+&lt;p&gt;The crux of any automated process is it failing silently. This is especially bad
+in the context of backups, since you don&#x27;t need them until you do. I solved this
+by reporting the result of the replication to Honeycomb after every run. It
+reports the &lt;code&gt;$SERVICE_RESULT&lt;&#x2F;code&gt;, &lt;code&gt;$EXIT_CODE&lt;&#x2F;code&gt; and &lt;code&gt;$EXIT_STATUS&lt;&#x2F;code&gt; as returned by
+systemd. I then create an alert that fires if there are no successful runs in
+the past hour.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;future-work&quot;&gt;Future Work&lt;&#x2F;h2&gt;
+&lt;p&gt;While I like this system for being simple, I think there is a bit more work in
+making it pure. For one, there should be no more than 1 manual step for setup,
+and 1 manual step for tear down. There should also be a similar simplicity in
+upgrading&#x2F;downgrading storage space.&lt;&#x2F;p&gt;
+&lt;p&gt;For reliability, the archiver instance should scrub its drive on a schedule.
+This isn&#x27;t setup yet.&lt;&#x2F;p&gt;
+&lt;p&gt;At $0.015 gb&#x2F;month this is relatively cheap, but not the cheapest. According to
+&lt;a href=&quot;https:&#x2F;&#x2F;filstats.com&#x2F;&quot;&gt;filstats&lt;&#x2F;a&gt; I could use
+&lt;a href=&quot;https:&#x2F;&#x2F;www.filecoin.com&#x2F;&quot;&gt;Filecoin&lt;&#x2F;a&gt; to store data for much less. There&#x27;s no
+Block Device interface to this yet, so it wouldn&#x27;t be as simple as ZFS
+&lt;code&gt;send&#x2F;recv&lt;&#x2F;code&gt;. You&#x27;d lose the benefits of incremental snapshots. But it may be
+possible to build a block device interface on top. Maybe with an &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Network_block_device&quot;&gt;nbd-server&lt;&#x2F;a&gt;?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;extra&quot;&gt;Extra&lt;&#x2F;h2&gt;
+&lt;p&gt;Bits and pieces that may be helpful if you try setting something similar up.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;setting-host-key-and-nix-configuration-with-userdata&quot;&gt;Setting host key and Nix Configuration with UserData&lt;&#x2F;h3&gt;
+&lt;p&gt;NixOS on AWS has this undocumented nifty feature of setting the ssh host
+key and a new &lt;code&gt;configuration.nix&lt;&#x2F;code&gt; file straight from the &lt;a href=&quot;https:&#x2F;&#x2F;docs.aws.amazon.com&#x2F;AWSEC2&#x2F;latest&#x2F;APIReference&#x2F;API_UserData.html&quot;&gt;UserData
+field&lt;&#x2F;a&gt;.
+This lets you one, be sure that your SSH connection isn&#x27;t being
+&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Man-in-the-middle_attack&quot;&gt;MITM&lt;&#x2F;a&gt;, and two, configure
+the machine in a simple way. I use this feature to set the SSH host key and set
+the machine up with ZFS and the the &lt;code&gt;lz4&lt;&#x2F;code&gt; compression package.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;questions-comments&quot;&gt;Questions? Comments?&lt;&#x2F;h3&gt;
+&lt;p&gt;Email me if you set this system up. This is purposely not a tutorial, so you may
+hit snags. If you think something could be clearer feel free to make an
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;marcopolo&#x2F;marcopolo.github.io&quot;&gt;edit&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	
+	<entry xml:lang="en">
+		<title>Goodbye, bit rot</title>
+		<published>2021-02-01T00:00:00+00:00</published>
+		<updated>2021-02-01T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/goodbye-bit-rot/" type="text/html"/>
+		<id>https://marcopolo.io/code/goodbye-bit-rot/</id>
+		<content type="html">&lt;p&gt;Take a look at this picture:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;marcopolo.io&#x2F;code&#x2F;goodbye-bit-rot&#x2F;smalltalk-76.png&quot; alt=&quot;Smalltalk 76&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s a photo of Smalltalk 76 running the prototypical desktop UI. It&#x27;s
+taken for granted that this photo will be viewable for the indefinite future
+(or as long as we keep a PNG viewer around). But when we think about code,
+maybe the very same Smalltalk code we took this photo of, it&#x27;s assumed that
+eventually that code will stop running. It&#x27;ll stop working because of a
+mysterious force known as &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Software_rot&quot;&gt;bit
+rot&lt;&#x2F;a&gt;. Why? It&#x27;s this truly
+inevitable? Or can we do better?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;we-can-do-better&quot;&gt;We can do better&lt;&#x2F;h2&gt;
+&lt;p&gt;Bit rot often manifests in the case where some software &lt;em&gt;A&lt;&#x2F;em&gt; relies on a certain
+configured environment. Imagine &lt;em&gt;A&lt;&#x2F;em&gt; relies on a shared library &lt;em&gt;B&lt;&#x2F;em&gt;. As time
+progresses, the shared library &lt;em&gt;B&lt;&#x2F;em&gt; can (and probably will) be updated
+independently of &lt;em&gt;A&lt;&#x2F;em&gt;. Thus breaking &lt;em&gt;A&lt;&#x2F;em&gt;. But what if &lt;em&gt;A&lt;&#x2F;em&gt; could say it
+explicitly depends on version &lt;em&gt;X.Y.Z&lt;&#x2F;em&gt; of &lt;em&gt;B&lt;&#x2F;em&gt;, or even better yet, the version
+of the library that hashes to the value &lt;code&gt;0xBADCOFFEE&lt;&#x2F;code&gt;. Then you break the
+implicit dependency of a correctly configured environment. &lt;em&gt;A&lt;&#x2F;em&gt; stops
+depending on the world being in a certain state. Instead, &lt;em&gt;A&lt;&#x2F;em&gt;
+&lt;em&gt;explicitly defines&lt;&#x2F;em&gt; what the world it needs should look like.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-nix&quot;&gt;Enter Nix&lt;&#x2F;h2&gt;
+&lt;p&gt;This is what &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;&quot;&gt;Nix&lt;&#x2F;a&gt; gives you. A way to explicitly define
+what a piece of software needs to build and run. Here&#x27;s an example of the
+definition on how to build the &lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org&#x2F;software&#x2F;hello&#x2F;&quot;&gt;GNU
+Hello&lt;&#x2F;a&gt; program:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;nixpkgs&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{});
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;derivation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;builder &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;bash&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;bash&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;args &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;builder.sh &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildInputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;gnutar gzip gnumake gcc binutils-unwrapped coreutils gawk gnused gnugrep &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;src &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;hello-2.10.tar.gz&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;system &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;builtins&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;currentSystem&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It&#x27;s not necessary to explain this &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;guides&#x2F;nix-pills&#x2F;generic-builders.html#idm140737320275008&quot;&gt;code in
+detail&lt;&#x2F;a&gt;.
+It&#x27;s enough to point out that &lt;code&gt;buildInputs&lt;&#x2F;code&gt; defines what the environment should
+contain (i.e. it should contain &lt;code&gt;gnutar&lt;&#x2F;code&gt;, &lt;code&gt;gzip&lt;&#x2F;code&gt;, &lt;code&gt;gnumake&lt;&#x2F;code&gt;, etc.). And the
+versions of these dependencies are defined by the current version of
+&lt;code&gt;&amp;lt;nixpkgs&amp;gt;&lt;&#x2F;code&gt;. These dependencies can be further pinned (or &lt;em&gt;locked&lt;&#x2F;em&gt; in the
+terminology of some languages like Javascript and Rust) to ensure that this
+program will always be built with the same exact versions of its dependencies.
+This extends to the runtime as well. This means you can run two different
+programs that each rely on a different &lt;code&gt;glibc&lt;&#x2F;code&gt;. Or to bring it back to our
+initial example, software &lt;em&gt;A&lt;&#x2F;em&gt; will always run because it will always use the
+same exact shared library &lt;em&gt;B&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-concrete-example-this-will-never-bit-rot&quot;&gt;A concrete example. This will never bit rot.&lt;&#x2F;h2&gt;
+&lt;p&gt;To continue our Smalltalk theme, here&#x27;s a &amp;quot;Hello World&amp;quot; program that, barring a
+fundamental change in how Nix Flakes works, will work forever&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; on an x86_64
+linux machine.&lt;&#x2F;p&gt;
+&lt;p&gt;The definition of our program, &lt;code&gt;flake.nix&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;nixos-20.09&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;self, nixpkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;:
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;legacyPackages&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x86_64-linux&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;defaultPackage&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;x86_64-linux &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;writeScriptBin &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello-smalltalk&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &amp;#39;&amp;#39;
+        &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;gnu-smalltalk&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;gst &amp;lt;&amp;lt;&amp;lt; &amp;quot;Transcript show: &amp;#39;Hello World!&amp;#39;.&amp;quot;
+      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
+    }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The pinned version of all our dependencies, &lt;code&gt;flake.lock&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nodes&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;locked&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lastModified&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1606669556&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;narHash&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256-9rlqZ5JwnA6nK04vKhV0s5ndepnWL5hpkaTV1b4ASvk=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;owner&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NixOS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rev&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ae47c79479a086e96e2977c61e538881913c0c08&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+      },
+      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;original&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;owner&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NixOS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ref&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixos-20.09&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+      }
+    },
+    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
+        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+      }
+    }
+  },
+  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
+  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;version&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;7
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;copy those files into a directory and run it:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;❯&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; nix run
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; World!
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;solid-foundations&quot;&gt;Solid Foundations&lt;&#x2F;h2&gt;
+&lt;p&gt;With Nix, we can make steady forward progress. Without fear that our foundations
+will collapse under us like sand castles. Once we&#x27;ve built something in Nix we
+can be pretty sure it will work for our colleague or ourselves in 10 years. Nix
+is building a solid foundation that I can no longer live without.&lt;&#x2F;p&gt;
+&lt;p&gt;If you haven&#x27;t used Nix before, here&#x27;s your call to action:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nix&#x27;s homepage: &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;&quot;&gt;https:&#x2F;&#x2F;nixos.org&#x2F;&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Nix&#x27;s Learning page: &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;learn&quot;&gt;https:&#x2F;&#x2F;nixos.org&#x2F;learn&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Learn Nix in little bite-sized pills: &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;guides&#x2F;nix-pills&#x2F;&quot;&gt;https:&#x2F;&#x2F;nixos.org&#x2F;guides&#x2F;nix-pills&#x2F;&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;&#x2F;h2&gt;
+&lt;p&gt;There are various factors that lead to bit rot. Some are easier to solve than
+others. For the purpose of this post I&#x27;m only considering programs that are
+roughly self contained. For example, if a program relies on hitting a specific
+Google endpoint, the only way to use this program would be to emulate the whole
+Google stack or rely on that &lt;a href=&quot;https:&#x2F;&#x2F;gcemetery.co&#x2F;&quot;&gt;endpoint existing&lt;&#x2F;a&gt;.
+Sometimes it&#x27;s doable to emulate the external API, and sometimes it isn&#x27;t. This
+post is specifically about cases where it is feasible to emulate the external API.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;footnotes&quot;&gt;Footnotes&lt;&#x2F;h3&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;Okay forever is a really long time. And this will likely not run forever. But why? The easy reasons are: &amp;quot;Github is down&amp;quot;, &amp;quot;A source tarball you need can&#x27;t be fetched from the internet&amp;quot;, &amp;quot;x86_64 processors can&#x27;t be found or emulated&amp;quot;. But what&#x27;s a weird reason that this may fail in the future? It&#x27;ll probably be hard to predict, but maybe something like: SHA256 has been broken and criminals and&#x2F;or pranksters have published malicious packages that match a certain SHA256. So build tools that rely on a deterministic and hard to break hash algorithm like SHA256 (like what Nix does) will no longer be reliable. That would be a funny future. Send me your weird reasons: &lt;code&gt;&amp;quot;marco+forever&amp;quot; ++ &amp;quot;@marcopolo.io&amp;quot;&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+	</entry>
+</feed>
