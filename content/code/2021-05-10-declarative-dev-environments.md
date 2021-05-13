@@ -31,6 +31,10 @@ to include the actual binaries you will run in the repo, but it should be
 reproducible. If you clone my project you should be running the exact
 same tools as me.
 
+Just like you have explicit dependencies on libraries you use in your program, a
+declarative dev environment lets you define your tooling dependencies (e.g.
+which version of Node, Yarn, or your specific cross compiler toolchain).
+
 ## How I setup my declarative dev environments
 
 To accomplish this I use [Nix] with [Nix Flakes] and [direnv]. There are three
@@ -39,7 +43,8 @@ I need for development; `flake.lock` which is similar in spirit to a `yarn.lock`
 or `Cargo.lock` file, it _locks_ the exact version of any tool used and
 generated automatically the first time you introduce dependencies; and finally a
 `.envrc` file which simply tells direnv to ask Nix what the environment should
-be, and sets up the environment. Here are some simple examples:
+be, and sets up the environment when you `cd` into the folder. Here are some
+simple examples:
 [flake.nix](https://github.com/MarcoPolo/templates/tree/master/trivial),
 [.envrc](https://github.com/MarcoPolo/templates/blob/master/trivial/.envrc)
 (`flake.lock` omitted since it's automatically generated).
@@ -54,6 +59,8 @@ effect.
 
 This blog itself makes use of [declarative dev
 environments](https://github.com/MarcoPolo/marcopolo.github.io/blob/master/flake.nix#L14).
+Zola is the static site generator I use. When I `cd` into my blog my environment
+is automatically setup with Zola available for previewing the blog.
 
 
 ## How Nix works, roughly
@@ -62,7 +69,7 @@ This all works off [Nix]. Nix is a fantastic package manager and build tool that
 provides reproducible versions of packages that don't rely on a specific global
 system configuration. Specifically packages installed through Nix don't rely an
 a user's `/usr/lib` or anything outside of `/nix/store`. You don't even need
-libc installed (as may be the case if you are on [Alpine
+glibc installed (as may be the case if you are on [Alpine
 Linux](https://www.alpinelinux.org/)).
 
 For a deeper dive see [How Nix Works](https://nixos.org/guides/how-nix-works.html).
@@ -125,6 +132,7 @@ expressions (you can only have one top level JSON object), unlike JSON you can
 have functions and variables. 
 
 ```nix
+# This is our top level set expression. Equivalent to the top level JSON object.
 {
   # These are comments
 
@@ -177,14 +185,14 @@ are for things that are useful when developing in general. Vim, Emacs,
 
 Dev tools are worth defining explicitly in your project's declarative dev environment (in
 a `flake.nix` file). A Dev Setup is highly personal and not worth defining in the
-project's declarative dev environment. But that is not to your dev setup in not
-worth defining at all. In fact, if you are familiar with Nix, you can extend the
-same ideas of this post to your user account with
-[Home Manager](https://github.com/nix-community/home-manager). 
+project's declarative dev environment. But that's not to say your dev setup in not
+worth defining at all. In fact, if you are (or when you become) familiar with
+Nix, you can extend the same ideas of this post to your user account with [Home
+Manager](https://github.com/nix-community/home-manager). 
 
 With Home Manager You can declaratively define which programs you want available
 in your dev setup, what Vim plugins you want installed, what ZSH plugins you
-want available and much more. It's the core idea of declarative environments
+want available and much more. It's the core idea of declarative dev environments
 taken to the user account level.
 
 ## Why not Docker?
@@ -208,9 +216,9 @@ but resort to `vi` when developing inside a container.  Or worse, you'll
 rebuild your dev setup inside the container, which does nothing more than
 add dead weight to the container since it's an addition solely for you and not
 really part of the project. Of course there are some workarounds to this issue,
-for example VS Code supports opening a project inside a container.
-[ZMK](https://github.com/zmkfirmware/zmk) does this and it has worked great for
-me.
+you can bind mount a folder and VS Code supports opening a project inside a
+container.  [ZMK](https://github.com/zmkfirmware/zmk) does this and it has
+worked great.
 
 If you are on MacOS, developing inside a container is actually slower. Docker
 on Mac relies on running a linux VM in the background and running containers in
@@ -221,7 +229,7 @@ x86-linux environment and Docker provides a convenient proxy for this. In these
 cases I'd suggest using Nix to generate the Docker images. This way you get the
 declarative and reproducible properties from Nix and the convenience from Docker.
 
-As a caveat to all of the above, if you already have a reproducible dev setup
+As a caveat to all of the above, if you already have a reproducible dev environment
 with a Docker container that works for you, please don't throw that all out and
 redesign your system from scratch. Keep using it until it stops meeting your
 needs and come back to this when it happens. Until then, keep building.
@@ -231,7 +239,7 @@ needs and come back to this when it happens. Until then, keep building.
 Nix Flakes is still new and in beta, so it's likely that if you install Nix from
 their [download page](https://nixos.org/download.html) you won't have Nix Flakes
 available. If you don't already have Nix installed, you can install a version
-with Nix Flakes [here](https://github.com/numtide/nix-unstable-installer),
+with Nix Flakes [with the unstable installer](https://github.com/numtide/nix-unstable-installer),
 otherwise read the section on [installing flakes](https://nixos.wiki/wiki/Flakes#Installing_flakes).
 
 
