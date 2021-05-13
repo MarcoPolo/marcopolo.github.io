@@ -21,7 +21,7 @@ jobs:
       - name: Cachix
         uses: cachix/cachix-action@v8
         with:
-          name: cryptic
+          name: marcopolo-blog
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build
       - name: Deploy
