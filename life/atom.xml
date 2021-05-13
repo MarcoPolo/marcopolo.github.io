@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - Life</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/life/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io/life/"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-08-30T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/life/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Active Projects</title>
+		<published>2019-08-30T00:00:00+00:00</published>
+		<updated>2019-08-30T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/life/active-projects/" type="text/html"/>
+		<id>https://marcopolo.io/life/active-projects/</id>
+		<content type="html">&lt;h1 id=&quot;active-projects-with-updates&quot;&gt;Active Projects (with updates)&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;react-causal-profiler&quot;&gt;React Causal Profiler&lt;&#x2F;h2&gt;
+&lt;p&gt;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=r-TLSBdHe1A&amp;amp;t=11s&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;fastly-labs-terrarium-on-kbfs&quot;&gt;fastly labs terrarium on KBFS&lt;&#x2F;h2&gt;
+&lt;p&gt;Push wasm code, have it run on distributed servers for you
+(done)[https:&#x2F;&#x2F;marcopolo.io&#x2F;wasm]&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;android-wired-a-rust-ui-framework-for-android&quot;&gt;Android Wired - A Rust UI framework for Android&lt;&#x2F;h2&gt;
+&lt;p&gt;(repo)[https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;android-wired&#x2F;]&lt;&#x2F;p&gt;
+&lt;p&gt;An attempt at building a friend Rust UI library for Android.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Coming up: Add flex-box support on android&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h1 id=&quot;interesting-cities-map&quot;&gt;Interesting Cities Map&lt;&#x2F;h1&gt;
+&lt;p&gt;Yet another map of cities that seem nice to live in. Scored by:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Climbing&lt;&#x2F;li&gt;
+&lt;li&gt;Bike Score&lt;&#x2F;li&gt;
+&lt;li&gt;Walk Score&lt;&#x2F;li&gt;
+&lt;li&gt;Population&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;To add:
+&lt;a href=&quot;https:&#x2F;&#x2F;www.expatistan.com&#x2F;cost-of-living&#x2F;index&quot;&gt;Cost of living index&lt;&#x2F;a&gt;
+Disaster preparedness&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;slack-bridge&quot;&gt;Slack Bridge&lt;&#x2F;h2&gt;
+&lt;p&gt;Connect kb to slack with the bot library&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;slack-keybase-bridge&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;move-off-of-betterment&quot;&gt;Move off of betterment&lt;&#x2F;h2&gt;
+&lt;p&gt;A 3% return is only barely better than a bank.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;rusty-keybase-bot&quot;&gt;Rusty Keybase Bot&lt;&#x2F;h2&gt;
+&lt;p&gt;Build a Keybase Bot Library in Rust (With proper typings)&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;This is live! https:&#x2F;&#x2F;crates.io&#x2F;crates&#x2F;keybase-bot-api&lt;&#x2F;li&gt;
+&lt;li&gt;I rabbit holed into creating an AVDL parser with pest.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;riding-those-new-bart-trains&quot;&gt;Riding those new BART trains?&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Is it possible to figure out when the new bart trains are arriving so I can optimize my commute to ride those puppies?&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;programmatically-find-climbing-crags&quot;&gt;Programmatically find Climbing crags&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;How can I parse USGS and GIS data to find good crags for climbing?&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	
+	<entry xml:lang="en">
+		<title>Travel Plans</title>
+		<published>2019-08-22T00:00:00+00:00</published>
+		<updated>2019-08-22T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/life/travelling/" type="text/html"/>
+		<id>https://marcopolo.io/life/travelling/</id>
+		<content type="html">&lt;ul&gt;
+&lt;li&gt;Florida 23 -&amp;gt; 29&lt;&#x2F;li&gt;
+&lt;li&gt;Bay Area 29 -&amp;gt; ?&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

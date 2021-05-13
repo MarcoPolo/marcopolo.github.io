@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - Traveling</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/traveling/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-08-22T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/traveling/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Travel Plans</title>
+		<published>2019-08-22T00:00:00+00:00</published>
+		<updated>2019-08-22T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/life/travelling/" type="text/html"/>
+		<id>https://marcopolo.io/life/travelling/</id>
+		<content type="html">&lt;ul&gt;
+&lt;li&gt;Florida 23 -&amp;gt; 29&lt;&#x2F;li&gt;
+&lt;li&gt;Bay Area 29 -&amp;gt; ?&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - VMs</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/vms/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-03-24T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/vms/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Simple Declarative VMs</title>
+		<published>2021-03-24T00:00:00+00:00</published>
+		<updated>2021-03-24T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/simple-vms/" type="text/html"/>
+		<id>https://marcopolo.io/code/simple-vms/</id>
+		<content type="html">&lt;p&gt;I&#x27;ve been on a hunt to find a simple and declarative way to define VMs. I wanted
+something like &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;nixos&#x2F;stable&#x2F;#ch-containers&quot;&gt;NixOS
+Containers&lt;&#x2F;a&gt;, but with a
+stronger security guarantee. I wanted to be able to use a Nix expression to
+define what the VM should look like, then reference that on my Server&#x27;s
+expression and have it all work automatically. I didn&#x27;t want to manually
+run any commands. The hunt is over, I finally found it.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;my-use-case&quot;&gt;My Use Case&lt;&#x2F;h2&gt;
+&lt;p&gt;I want a machine that I can permanently hook up to a WireGuard VPN and treat
+as if it were in a remote place. At first I did this with a physical machine,
+but I didn&#x27;t want to commit the whole machine&#x27;s compute for a novelty. What I
+really want is a small VM that is permanently hooked up to a WireGuard VPN.
+Minimal investment with all the upsides.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nixos-qemu&quot;&gt;NixOS QEMU&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix OS supports building your system in a QEMU runnable environment right out of
+the box. &lt;code&gt;nixos-rebuild build-vm&lt;&#x2F;code&gt; is a wrapper over &lt;code&gt;nix build github:marcopolo&#x2F;marcopolo.github.io#nixosConfigurations.small-vm.config.system.build.vm&lt;&#x2F;code&gt;. (Side note, with
+flakes you can build this exact VM by running that command&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;). This means NixOS
+already did the hard work of turning a NixOS configuration into a valid VM that
+can be launched with QEMU. Not only that, but the VM shares the &lt;code&gt;&#x2F;nix&#x2F;store&lt;&#x2F;code&gt;
+with the host. This results in a really small VM (disk size is 5MB).&lt;&#x2F;p&gt;
+&lt;p&gt;NixOS does the heavy lifting of converting a configuration into a script that
+will run a VM, so all I need to do is write a service that manages this process.
+Enter &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;simple-vms&#x2F;&quot;&gt;simple-vms&lt;&#x2F;a&gt;, heavily inspired by
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Nekroze&#x2F;vms.nix&quot;&gt;vms.nix&lt;&#x2F;a&gt; and
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Mic92&#x2F;nixos-shell&quot;&gt;nixos-shell&lt;&#x2F;a&gt;. &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;simple-vms&#x2F;&quot;&gt;simple-vms&lt;&#x2F;a&gt; is a NixOS
+module that takes in a reference to the
+&lt;code&gt;nixosConfigurations.small-vm.config.system.build.vm&lt;&#x2F;code&gt; derivation and the
+option of whether you want state to be persisted, and defines a Systemd
+service for the vm (There can be multiple VMs). This really is a simple
+module, the NixOS service definition is about 10 lines long, and its
+&lt;code&gt;ExecStart&lt;&#x2F;code&gt; is simply:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir -p &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+cd &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+exec ${cfg.vm.out}&#x2F;bin&#x2F;run-nixos-vm;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With this service we can get and keep our VMs up and running.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;stateless-vms&quot;&gt;Stateless VMs&lt;&#x2F;h2&gt;
+&lt;p&gt;I got a sticker recently that said &amp;quot;You either have one source of truth, of
+multiple sources of lies.&amp;quot; To that end, I wanted to make my VM completely
+stateless. QEMU lets you mount folders into the VM, so I used that to mount host
+folders in the VM&#x27;s &lt;code&gt;&#x2F;etc&#x2F;wireguard&lt;&#x2F;code&gt; and &lt;code&gt;&#x2F;etc&#x2F;ssh&lt;&#x2F;code&gt; so that the host can
+provide the VM with WireGuard keys, and the VM can persist it&#x27;s SSH host keys.&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s all the VM really needs. Every time my VM shuts down I delete the drive.
+And just to be safe, I try deleting any drive on boot too.&lt;&#x2F;p&gt;
+&lt;p&gt;If you&#x27;re running a service on the VM, you&#x27;ll likely want to persist that
+service&#x27;s state files too in a similar way.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;fin&quot;&gt;Fin&lt;&#x2F;h2&gt;
+&lt;p&gt;That&#x27;s it. Just a small post for a neat little trick. If you set this up let
+me know! I&#x27;m interested in hearing your use case.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;footnotes&quot;&gt;Footnotes&lt;&#x2F;h3&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;User&#x2F;pass = root&#x2F;root. Exit qemu with C-a x.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+	</entry>
+</feed>

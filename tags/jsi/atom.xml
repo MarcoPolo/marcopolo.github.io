@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - JSI</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/jsi/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-06-27T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/jsi/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Interacting with Go from React Native through JSI</title>
+		<published>2019-06-27T00:00:00+00:00</published>
+		<updated>2019-06-27T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/go-rn-jsi/" type="text/html"/>
+		<id>https://marcopolo.io/code/go-rn-jsi/</id>
+		<content type="html">&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;&#x2F;h1&gt;
+&lt;p&gt;There are 3 parts that let JS talk to Go:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;The C++ binding&lt;&#x2F;li&gt;
+&lt;li&gt;Installing the binding&lt;&#x2F;li&gt;
+&lt;li&gt;Calling Go&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Not all the code is shown, check out the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;react-native-hostobject-demo&quot;&gt;source code&lt;&#x2F;a&gt; for specifics.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;part-1-the-c-binding&quot;&gt;Part 1 - The C++ Binding&lt;&#x2F;h3&gt;
+&lt;p&gt;The binding is the C++ glue code that will hook up your Go code to the JS runtime. The binding itself is composed of two main parts.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;part-1-1-the-c-binding&quot;&gt;Part 1.1 - The C++ Binding&lt;&#x2F;h4&gt;
+&lt;p&gt;The binding is a c++ class that implements the &lt;code&gt;jsi::HostObject&lt;&#x2F;code&gt; interface. At the very least it&#x27;s useful for it to have a &lt;code&gt;get&lt;&#x2F;code&gt; method defined. The type of the &lt;code&gt;get&lt;&#x2F;code&gt; method is:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;jsi::Value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(jsi::Runtime &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;runtime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; jsi::PropNameID &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;override&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It returns a &lt;code&gt;jsi::Value&lt;&#x2F;code&gt; (a value that is safe for JS). It&#x27;s given the JS runtime and the prop string used by JS when it &lt;code&gt;get&lt;&#x2F;code&gt;s the field. e.g. &lt;code&gt;global.nativeTest.foo&lt;&#x2F;code&gt; will call this method with PropNameID === &lt;code&gt;&amp;quot;foo&amp;quot;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;part-1-2-the-c-binding-s-install&quot;&gt;Part 1.2 - The C++ Binding&#x27;s install&lt;&#x2F;h4&gt;
+&lt;p&gt;Now that we&#x27;ve defined our HostObject, we need to install it into the runtime. We use a static member function that we&#x27;ll call later to set this up. It looks like this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;TestBinding::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(jsi::Runtime &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;runtime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
+                          std::shared_ptr&amp;lt;TestBinding&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;testBinding&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) {
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; What is the name that js will use when it reaches for this?
+  &#x2F;&#x2F; i.e. `global.nativeTest` in JS
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;auto&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; testModuleName = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nativeTest&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Create a JS object version of our binding
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;auto&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; object = jsi::Object::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createFromHostObject&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(runtime, testBinding);
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; set the &amp;quot;nativeTest&amp;quot; propert
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;  runtime.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;global&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setProperty&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(runtime, testModuleName, std::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;move&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(object));
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;part-2-installing-the-binding-on-android&quot;&gt;Part 2. Installing the binding (on Android)&lt;&#x2F;h3&gt;
+&lt;p&gt;Since we have a reference to the runtime in Java land, we&#x27;ll have to create a JNI method to pass the runtime ptr to the native C++ land. We can add this JNI method to our TestBinding file with a guard.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; ANDROID
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; {
+JNIEXPORT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; JNICALL &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;Java_com_testmodule_MainActivity_install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
+    JNIEnv *&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;env&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, jobject &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;thiz&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, jlong &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;runtimePtr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) {
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;auto&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; testBinding = std::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;make_shared&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;lt;example::TestBinding&amp;gt;();
+  jsi::Runtime *runtime = (jsi::Runtime *)runtimePtr;
+
+  example::TestBinding::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(*runtime, testBinding);
+}
+}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then on the Java side (after we compile this into a shared library), we register this native function and call it when we&#x27;re ready.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; In MainActivity
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;public class &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;MainActivity &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extends &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ReactActivity &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;implements &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ReactInstanceManager&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ReactInstanceEventListener &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;{
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;static &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;{
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Load our jni
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;System&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;loadLibrary&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test_module_jni&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;);
+    }
+
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;... ellided ...
+
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;@&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Override
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;public void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;onReactContextInitialized&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;ReactContext &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;context&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;) {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Call our native function with the runtime pointer
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;(context.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;getJavaScriptContextHolder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;());
+    }
+
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;  declare our native function
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;public native void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;long &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;jsContextNativePointer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eff1f5;&quot;&gt;);
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;part-3-calling-go&quot;&gt;Part 3. Calling Go&lt;&#x2F;h3&gt;
+&lt;p&gt;Now that our binding is installed in the runtime, we can make it do something useful.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;jsi::Value TestBinding::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(jsi::Runtime &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;runtime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
+                            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; jsi::PropNameID &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) {
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;auto&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; methodName = name.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;utf8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(runtime);
+
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(methodName == &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;runTest&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;) {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;jsi::Function::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createFromHostFunction&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
+        runtime, name, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
+        [](jsi::Runtime &amp;amp;runtime, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; jsi::Value &amp;amp;thisValue,
+           &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; jsi::Value *arguments,
+           size_t count) -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;jsi&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;TestNum&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(); });
+  }
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;jsi::Value::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;undefined&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;();
+}
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here we return a &lt;code&gt;jsi::Function&lt;&#x2F;code&gt; when JS calls &lt;code&gt;global.nativeTest.runTest&lt;&#x2F;code&gt;. When JS calls it (as in &lt;code&gt;global.nativeTest.runTest()&lt;&#x2F;code&gt;) we execute the code inside the closure, which just returns &lt;code&gt;TestNum()&lt;&#x2F;code&gt;. TestNum is a Go function that&#x27;s exported through cgo so that it is available to c&#x2F;c++. Our Go code looks like this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;package &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; TestNum returns a test number to be used in JSI
+&#x2F;&#x2F;export TestNum
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;TestNum&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;9001&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;cgo builds a header and creates a shared library that is used by our binding.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;building&quot;&gt;Building&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Look at the CMakeLists.txt for specifics on building the C++ code.&lt;&#x2F;li&gt;
+&lt;li&gt;Look at from-go&#x2F;build.sh for specifics on building the go code.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;a-go-shared-library-for-c-java&quot;&gt;A Go Shared Library for C + Java&lt;&#x2F;h3&gt;
+&lt;p&gt;It&#x27;s possible to build the Go code as a shared library for both C and Java, but you&#x27;ll have to define your own JNI methods. It would be nice if gomobile bind also generated C headers for android, but it doesn&#x27;t seem possible right now. Instead you&#x27;ll have to run &lt;code&gt;go build -buildmode=c-shared&lt;&#x2F;code&gt; directly and define your jni methods yourself. Take a look at &lt;code&gt;from-go&#x2F;build.sh&lt;&#x2F;code&gt; and testnum.go for specifics.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;further-reading&quot;&gt;Further Reading&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;medium.com&#x2F;@christian.falch&#x2F;https-medium-com-christian-falch-react-native-jsi-challenge-1201a69c8fbf&quot;&gt;JSI Challenge #1&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;medium.com&#x2F;@christian.falch&#x2F;react-native-jsi-challenge-2-56fc4dd91613&quot;&gt;JSI Challenge #2&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;http:&#x2F;&#x2F;blog.nparashuram.com&#x2F;2019&#x2F;01&#x2F;react-natives-new-architecture-glossary.html&quot;&gt;RN Glossary of Terms&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.dogan.io&#x2F;2015&#x2F;08&#x2F;15&#x2F;java-jni-jnr-go&#x2F;&quot;&gt;GO JNI&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;rakyll.org&#x2F;cross-compilation&#x2F;&quot;&gt;GO Cross Compilation&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	
+	<entry xml:lang="en">
+		<title>Introducing Servant, a Clojurescript library for web workers</title>
+		<published>2013-10-01T00:00:00+00:00</published>
+		<updated>2013-10-01T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/servant-cljs/" type="text/html"/>
+		<id>https://marcopolo.io/code/servant-cljs/</id>
+		<content type="html">&lt;h1 id=&quot;concurrent-programming&quot;&gt;Concurrent Programming&lt;&#x2F;h1&gt;
+&lt;p&gt;Javascript by default is single threaded, but web workers introduce
+OS level threads. Concurrent programming is hard enough (in imperative
+languages), so the webworker designers decided to circumvent a bunch of
+concurrency problems by forbidding any shared data between threads. There are
+better ways of doing this (read &lt;em&gt;immutability&lt;&#x2F;em&gt;), but we work with what we got.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;br&gt;&lt;&#x2F;br&gt;&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;problems-with-web-workers&quot;&gt;Problems with web workers&lt;&#x2F;h1&gt;
+&lt;p&gt;I&#x27;ve done a couple projects with web workers. The biggest project being
+&lt;a href=&quot;http:&#x2F;&#x2F;cryptic.io&quot;&gt;Cryptic.io&lt;&#x2F;a&gt;, which uses webworkers to efficiently
+encrypt&#x2F;decrypt large (GBs) files, and parallel {down,up}load file chunks. Here
+are problems I&#x27;ve stumbled across:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Everything about the web worker needs to be asynchronous, meaning callback hell&lt;&#x2F;li&gt;
+&lt;li&gt;You need to think in a separate context for the web worker, you can&#x27;t call any functions defined with the rest of your code.&lt;&#x2F;li&gt;
+&lt;li&gt;Distributing workload effectively.&lt;&#x2F;li&gt;
+&lt;li&gt;The problems only gets worse the more web workers you bring in.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;br &#x2F;&gt;
+&lt;h1 id=&quot;enter-servant&quot;&gt;Enter Servant&lt;&#x2F;h1&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;marcopolo&#x2F;servant&quot;&gt;Servant&lt;&#x2F;a&gt; is a super small (literally ~100 lines) library that solves all the
+problems above, allowing you to write clean, multithreaded, ClojureScript. Even
+though it&#x27;s small, it does a lot.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;It allows you to define servant functions alongside the rest of your code, even using functions already defined in your
+namespace.&lt;&#x2F;li&gt;
+&lt;li&gt;It automatically balances work across webworkers.&lt;&#x2F;li&gt;
+&lt;li&gt;It provides simple ways to do a normal (copy of arguments) or efficient (arraybuffer transfer) call
+to webworkers, easily.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;sharing-functions-and-predefined-variables&quot;&gt;Sharing functions, and predefined variables&lt;&#x2F;h1&gt;
+&lt;p&gt;This was the trickiest part of the library. I wanted the ability to define
+useful functions, and use them in the webworker without having to copy it over
+to a separate worker.js file. I solved it by using the same exact file for both
+the main page (browser context) and the web worker. That, however, came with one
+problem; you have to explicitly declare code that should run on the webworker
+and code that runs in the browser. Like so:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ns&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; servant.demo
+  (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;:require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[servant.core &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;:as&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; servant]
+            [servant.worker &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;:as&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; worker]))
+
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;window-load &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[] (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;.log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; js&#x2F;console &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;this runs in the browser&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;))
+
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;servant&#x2F;webworker?&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;worker&#x2F;bootstrap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;;;Sets the worker up to receive messages
+    (set! (.-onload js&#x2F;window) window-load))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;As part of that caveat, the webworker can only see code that it can get to.
+Anything defined in window-load would not be visible to the webworker. Now let&#x27;s
+take a look at how we can define a servant function, using the &lt;code&gt;defservantfn&lt;&#x2F;code&gt;
+macro.&lt;&#x2F;p&gt;
+&lt;p&gt;We need to use a special function, &lt;code&gt;defservantfn&lt;&#x2F;code&gt; to define functions that will
+serve as our &amp;quot;access points&amp;quot; to the web worker.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ns&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; servant.demo
+  (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;:require-macros &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[servant.macros &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;:refer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[defservantfn]]))
+
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;make-it-funny &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[not-funny]
+  (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;str &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hahahah:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; not-funny))
+
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defservantfn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;servant-with-humor &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[your-joke]
+    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;make-it-funny&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; your-joke))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;defservantfn&lt;&#x2F;code&gt; macro simply calls a defn with the
+same arguments, and registers that function with a hashmap atom for the
+webworker. The key is the hash of the function and the value is the function
+itself. The webworker needs to be able to know what function the browser is
+referring in a message, so I use the function&#x27;s hash as a token that
+the browser context and webworker can both agree on. The function&#x27;s
+&lt;code&gt;.toString()&lt;&#x2F;code&gt; value could have worked just as well.&lt;&#x2F;p&gt;
+&lt;p&gt;I should also mention, for efficiency reasons, Servant keeps a pool of N
+webworkers (you specify N) alive (until you explicitly kill them) so you only
+pay for the webworkers once. You control when the webworkers are created with
+&lt;code&gt;servant&#x2F;spawn-servants&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;workload-balancing&quot;&gt;Workload Balancing&lt;&#x2F;h1&gt;
+&lt;p&gt;Core.async is simply amazing, it took this tricky problem and made it trivial. The solution is 4 lines.
+The solution for Servant is:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;spawn N number of workers and place them in a buffered (of size N) channel.&lt;&#x2F;li&gt;
+&lt;li&gt;Take workers from the channel as you use them.&lt;&#x2F;li&gt;
+&lt;li&gt;Put them back when you get your result.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This is so beautifully simple. I just write the behavior I want, and core.async
+handles the messy state. If all the webworkers are busy the code will &amp;quot;block&amp;quot;
+until a webworker is free. What this means for you as a user, is you don&#x27;t have
+to think about which worker is available to run your code.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;configurable-message-types&quot;&gt;Configurable message types&lt;&#x2F;h1&gt;
+&lt;p&gt;Now the whole point of using webworkers is to be as fast as possible. Sometimes
+you can&#x27;t even afford copying data to the webworker (especially if the data is
+big, like at &lt;a href=&quot;http:&#x2F;&#x2F;cryptic.io&quot;&gt;Cryptic.io&lt;&#x2F;a&gt;). Servant provides a way to access
+webworkers&#x27; nifty &lt;a href=&quot;https:&#x2F;&#x2F;developer.mozilla.org&#x2F;en-US&#x2F;docs&#x2F;Web&#x2F;Guide&#x2F;Performance&#x2F;Using_web_workers#Passing_data_by_transferring_ownership_(transferable_objects)&quot;&gt;arraybuffer transfer context ability&lt;&#x2F;a&gt;.
+Take for example:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defservantfn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;get-first-4bytes-as-str &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[arraybuffer]
+  (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[d (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;js&#x2F;DataView.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; arraybuffer)]
+      (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;.toString &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;.getUint32&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; d &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That function expects an arraybuffer and returns a string. If we wanted to be
+efficient about it (and didn&#x27;t care about getting rid of the arraybuffer) we can
+make the call using the &lt;code&gt;servant&#x2F;array-buffer-message-standard-reply&lt;&#x2F;code&gt; fn instead
+of the &lt;code&gt;servant&#x2F;standard-message&lt;&#x2F;code&gt;. So the efficient result would be:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;arraybuffer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;js&#x2F;ArrayBuffer. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;))
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;d &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;js&#x2F;DataView.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; arraybuffer))
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;.setUint32&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; d &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 0xdeadbeef&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;result-channel
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;servant&#x2F;servant-thread&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+    servant-channel
+    servant&#x2F;array-buffer-message-standard-reply
+    get-first-4bytes-as-str arraybuffer [arraybuffer]))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The arguments to servant-thread are:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;servant-channel&lt;&#x2F;code&gt; - channel that contains the available workers&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;servant&#x2F;array-buffer-message-standard-reply&lt;&#x2F;code&gt; - A function that defines how the &lt;code&gt;.postMessage&lt;&#x2F;code&gt; function will be called (a.k.a mesage-fn)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;get-first-4bytes-as-str&lt;&#x2F;code&gt; - The servant function we defined earlier&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;arraybuffer&lt;&#x2F;code&gt; - our argument to the function&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;[arraybuffer]&lt;&#x2F;code&gt; - a vector of arraybuffers that are going to be transferred&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The message-fn can be anything, but I think servant has you covered with:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;standard-message&lt;&#x2F;code&gt; : Copies all the data both ways&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;array-buffer-message&lt;&#x2F;code&gt; : &lt;em&gt;Can&lt;&#x2F;em&gt; transfer the context both ways&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;array-buffer-message-standard-reply&lt;&#x2F;code&gt; : &lt;em&gt;Can&lt;&#x2F;em&gt; transfer the context when making the call, &lt;em&gt;won&#x27;t&lt;&#x2F;em&gt; transfer the context coming back&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;There is a reason why array-buffer-message isn&#x27;t just the standard. You need to
+explicitly tell the postMessage call that you want to transfer arraybuffers. So
+to transfer context you need an additional argument, an array of arraybuffers.
+You also need to make sure the defservantfn returns a vector of results and an
+array of arraybuffers [result [arraybuffer1]] if you want to transfer the
+arraybuffer from the worker to the browser context. I figured if you wanted
+that you could use it and deal with the extra argument, if you didn&#x27;t you could
+write your functions how you normally would.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;examples&quot;&gt;Examples&lt;&#x2F;h1&gt;
+&lt;p&gt;I wrote two examples using the servant library:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The first is a &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;servant-demo&quot;&gt;simple demo&lt;&#x2F;a&gt; showing several use cases.&lt;&#x2F;li&gt;
+&lt;li&gt;The next is more featured demo that can encrypt&#x2F;decrypt large files efficiently using webworkers.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;last-thoughts&quot;&gt;Last thoughts&lt;&#x2F;h1&gt;
+&lt;p&gt;I used to curse the name webworkers. They brought gifts of speed at the cost of
+complexity. Servant is different, it doesn&#x27;t sacrifice simplicity or
+efficiency. I&#x27;m pretty excited at the ease of using webworkers with servant, and
+I hope you have fun making an amazing, multithreaded Clojurescript application!&lt;&#x2F;p&gt;
+&lt;br &#x2F;&gt;
+</content>
+	</entry>
+</feed>

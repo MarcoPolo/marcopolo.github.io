@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - blogging</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/blogging/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-08-22T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/blogging/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>I moved my blog over to Zola, you should too</title>
+		<published>2019-08-22T00:00:00+00:00</published>
+		<updated>2019-08-22T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/migrating-to-zola/" type="text/html"/>
+		<id>https://marcopolo.io/code/migrating-to-zola/</id>
+		<content type="html">&lt;h1 id=&quot;blogging&quot;&gt;Blogging&lt;&#x2F;h1&gt;
+&lt;p&gt;I started this blog like many other folks, on GitHub Pages. It was great at
+the time. You can have a source repo that compiles to a blog. Neat! Over time
+though I started really feeling the pain points with it. When I wanted to
+write a quick post about something I&#x27;d often spend hours just trying to get
+the right Ruby environment set up so I can see my blog locally. When I got an
+email from GitHub saying that my blog repo has a security vulnerability in
+one of its Gems, I took the opportunity to switch over to
+&lt;a href=&quot;https:&#x2F;&#x2F;www.getzola.org&quot;&gt;Zola&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;zola&quot;&gt;Zola&lt;&#x2F;h1&gt;
+&lt;p&gt;Zola make more sense to me than Jekyll. I think about my posts in a
+hierarchy. I&#x27;d like my source code to match my mental representation. If you
+look at the &lt;a href=&quot;https:&#x2F;&#x2F;marcopolo.io&#x2F;code&#x2F;migrating-to-zola&#x2F;&quot;&gt;source&lt;&#x2F;a&gt; of this blog, you&#x27;ll see I have 3 folders (code, books,
+life). In each folder there are relevant posts. I wanted my blog to show the
+contents folder as different sections. For the life of me I couldn&#x27;t figure
+out how to do that in Jekyll. I ended up just using a single folder for all
+my posts and using the category metadata in the front-matter to create the
+different sections. With Zola, this kind of just worked. I had to create an
+&lt;code&gt;_index.md&lt;&#x2F;code&gt; file to provide some metadata, but nothing overly verbose.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;i-m-not-a-jekyll-pro&quot;&gt;I&#x27;m not a Jekyll pro...&lt;&#x2F;h1&gt;
+&lt;p&gt;Or even really any level past beginner. I image if you&#x27;ve already heavily
+invested yourself in the Jekyll ecosystem this probably wouldn&#x27;t make sense
+for you. I&#x27;m sure there are all sorts of tricks and features that Jekyll
+can do that Zola cannot. I&#x27;m Okay with that. I really don&#x27;t need that much
+from my blogging library.&lt;&#x2F;p&gt;
+&lt;p&gt;Zola has 3 commands: &lt;code&gt;build&lt;&#x2F;code&gt;, &lt;code&gt;serve&lt;&#x2F;code&gt;, and &lt;code&gt;init&lt;&#x2F;code&gt;. They do what you&#x27;d expect
+and nothing more. I really admire this philosophy. Whittle down your feature
+set and make those features a &lt;em&gt;joy&lt;&#x2F;em&gt; to use.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;fast&quot;&gt;Fast&lt;&#x2F;h1&gt;
+&lt;p&gt;Changes in Zola propagate quickly. Zola rebuilds my (admittedly very small blog) in less than a millisecond. Zola comes with a livereload script that automatically updates your browser when you are in &lt;code&gt;serve&lt;&#x2F;code&gt; mode. It&#x27;s feasible to write your post and see how it renders almost instantly.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;transition&quot;&gt;Transition&lt;&#x2F;h1&gt;
+&lt;p&gt;The biggest change was converting Jekyll&#x27;s front-matter (the stuff at the top
+of the md files) format into Zola&#x27;s front-matter format. Which was changing
+this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;---
+layout: post
+title: Interacting with Go from React Native through JSI
+categories: javascript react-native jsi go
+---
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;into this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+++
+title = &amp;quot;Interacting with Go from React Native through JSI&amp;quot;
+[taxonomies]
+tags = [&amp;quot;javascript&amp;quot;, &amp;quot;react-native&amp;quot;, &amp;quot;JSI&amp;quot;, &amp;quot;Go&amp;quot;]
++++
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;There was also a slight rewrite in the template files that was necessary
+since Zola uses the &lt;a href=&quot;https:&#x2F;&#x2F;tera.netlify.com&quot;&gt;Tera Templating Engine&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The rest was just moving (I&#x27;d argue organizing) files around.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;prettier-repo&quot;&gt;Prettier Repo&lt;&#x2F;h1&gt;
+&lt;p&gt;I think at the end the repo became a little prettier to look at. You could
+argue it&#x27;s a small thing, but I think these small things matter. It&#x27;s already
+hard enough to sit down and write a post. I want every bit of the experience
+to be beautiful.&lt;&#x2F;p&gt;
+&lt;p&gt;But don&#x27;t take my word for it! judge yourself: &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;marcopolo.github.io&#x2F;tree&#x2F;jekyll_archive&quot;&gt;Jekyll&lt;&#x2F;a&gt; vs. &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;marcopolo.github.io&quot;&gt;Zola&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

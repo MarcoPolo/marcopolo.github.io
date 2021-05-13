@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>MarcoPolo – Partially Functional - wasm</title>
+	<author><name>Marco</name></author>
+	<link href="https://marcopolo.io/tags/wasm/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://marcopolo.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2019-11-06T00:00:00+00:00</updated>
+	<id>https://marcopolo.io/tags/wasm/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>Wasm is the future of serverless. Terrafirma, serverless wasm functions.</title>
+		<published>2019-11-06T00:00:00+00:00</published>
+		<updated>2019-11-06T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/code/terrafirma/" type="text/html"/>
+		<id>https://marcopolo.io/code/terrafirma/</id>
+		<content type="html">&lt;p&gt;When I ran into Fastly&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;wasm.fastlylabs.com&#x2F;&quot;&gt;Terrarium&lt;&#x2F;a&gt;, the appeal of Webassembly (wasm) finally clicked for me. We could have lightweight sandboxes and bring in my own language and libraries without the overhead of a full OS VM or &lt;a href=&quot;https:&#x2F;&#x2F;blog.iron.io&#x2F;the-overhead-of-docker-run&#x2F;&quot;&gt;Docker&lt;&#x2F;a&gt;. That&#x27;s great for the serverless provider, but it&#x27;s also great for the end user. Less overhead means faster startup time and less total cost.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;how-much-faster&quot;&gt;How much faster?&lt;&#x2F;h2&gt;
+&lt;p&gt;On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.&lt;&#x2F;p&gt;
+&lt;p&gt;Following &lt;a href=&quot;https:&#x2F;&#x2F;blog.iron.io&#x2F;the-overhead-of-docker-run&#x2F;&quot;&gt;this experiment&lt;&#x2F;a&gt; I get these results:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;Running: .&#x2F;hello.sh
+avg: 3.516431ms
+Running: docker run treeder&#x2F;hello:sh
+avg: 692.306769ms
+Running: docker run --rm treeder&#x2F;hello:sh
+avg: 725.912422ms
+Running: docker start -a reuse
+avg: 655.059021ms
+Running: node hello.js
+avg: 79.233337ms
+Running: wasmer run wasi-hello-world.wasm
+avg: 15.155896ms
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;code&#x2F;wasm-graph.png&quot; alt=&quot;Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe.&quot; title=&quot;Safety vs Overhead&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The trend is that if you want safety and isolation, you must pay for it with overhead. WASM&#x27;s exception to that rule is what I think makes it so promising and interesting. Wasm provides the fastest way to run arbitrary user code in a sandboxed environment.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-is-webassembly&quot;&gt;What is Webassembly?&lt;&#x2F;h2&gt;
+&lt;p&gt;Webassembly is a spec for a lightweight and sandboxed VM. Webassembly is run by a host, and can&#x27;t do any side effects, unless it calls a function provided by the host. For example, if your WASM code wanted to make a GET request to a website, it could only do that by asking the host to help. The host exposes these helper function to the WASM guest. In Terrafirma, these are the &lt;code&gt;hostcall_*&lt;&#x2F;code&gt; functions in &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;go-wasm-terrafirma&#x2F;blob&#x2F;master&#x2F;imports.go&quot;&gt;&lt;code&gt;imports.go&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;. It&#x27;s called &lt;code&gt;imports.go&lt;&#x2F;code&gt; because it is what your WASM code is importing from the host.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;bring-your-own-tools&quot;&gt;Bring your own tools&lt;&#x2F;h2&gt;
+&lt;p&gt;As long as you can compile everything to a .wasm file, you can use whatever tools and language you want. All I have to do is provide a runtime, and all you have to do is provide a wasm file. However, there is a subtle caveat here. The only way you can run side effects is with the host cooperation. So you (or some library you use) must understand the environment you&#x27;re running in in order to do anything interesting.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-about-a-standard-wasm-environment&quot;&gt;What about a standard WASM Environment?&lt;&#x2F;h2&gt;
+&lt;p&gt;There isn&#x27;t a mature industry standard for what imports a host should provide to the WASM code running outside the browser. The closest thing we have is &lt;a href=&quot;https:&#x2F;&#x2F;wasi.dev&#x2F;&quot;&gt;WASI&lt;&#x2F;a&gt;, which defines a POSIX inspired set of syscalls that a host should implement. It&#x27;s useful because it allows code would otherwise require a real syscall to work in a WASM environment. For example, In Rust you can build with the &lt;code&gt;--target wasm32-wasi&lt;&#x2F;code&gt; flag and your code will just work in any &lt;a href=&quot;https:&#x2F;&#x2F;wasmer.io&#x2F;&quot;&gt;wasi environment&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;terrafirma&quot;&gt;Terrafirma&lt;&#x2F;h2&gt;
+&lt;p&gt;Phew! Finally at TerraFirma. TerraFirma is a WASM runtime environment I wrote to let you run wasm code in the cloud. You upload your wasm file by copying it into a shared &lt;a href=&quot;https:&#x2F;&#x2F;keybase.io&#x2F;docs&#x2F;kbfs&quot;&gt;KBFS folder&lt;&#x2F;a&gt; with the keybase user &lt;a href=&quot;https:&#x2F;&#x2F;keybase.io&#x2F;kbwasm&quot;&gt;kbwasm&lt;&#x2F;a&gt;. Then you setup some DNS records to point your domain to TerraFirma&#x27;s servers. And that&#x27;s it! You can update the wasm code at any time by overwriting the old .wasm file with the new one.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;code-examples&quot;&gt;Code Examples&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;terrafirma-hello-world&quot;&gt;Hello World&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MarcoPolo&#x2F;terrafirma-scraper&quot;&gt;Scraper Endpoint&lt;&#x2F;a&gt; – A web scraper that uses Servo – a new browser engine from Mozilla.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;terrafirma-hello-world-tutorial&quot;&gt;Terrafirma – Hello World Tutorial&lt;&#x2F;h3&gt;
+&lt;p&gt;This example uses Rust, so if you don&#x27;t have that setup &lt;a href=&quot;https:&#x2F;&#x2F;rustup.rs&#x2F;&quot;&gt;go here first&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Point your domain to TerraFirma servers (&lt;code&gt;terrafirma.marcopolo.io&lt;&#x2F;code&gt; or &lt;code&gt;52.53.126.109&lt;&#x2F;code&gt;) with an A record, and set a &lt;code&gt;TXT&lt;&#x2F;code&gt; record to point to your shared folder (e.g. &lt;code&gt;&amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;&lt;&#x2F;code&gt;)&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+example.com 300 A terrafirma.marcopolo.io
+
+_keybase_pages.example.com 300 TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;Verify the DNS records are correct&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+$ dig example.com A
+...
+;; ANSWER SECTION:
+wasm.marcopolo.io.      300     IN      A       52.53.126.109
+...
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;br&#x2F;&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+$ dig _keybase_pages.example.com TXT
+...
+;; ANSWER SECTION:
+_keybase_pages.example.com &amp;lt;number&amp;gt; IN TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbpbot&#x2F;&amp;quot;
+...
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;Clone the Hello World Repo&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;git clone git@github.com:MarcoPolo&#x2F;terrafirma-hello-world.git
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;4&quot;&gt;
+&lt;li&gt;Build it&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cd terrafirma-hello-world
+cargo build --release
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;5&quot;&gt;
+&lt;li&gt;Deploy it&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+cp target&#x2F;wasm32-unknown-unknown&#x2F;release&#x2F;terrafirma_helloworld.wasm &#x2F;keybase&#x2F;private&#x2F;&amp;lt;your_kb_username&amp;gt;,kbwasm&#x2F;hello.wasm
+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;6&quot;&gt;
+&lt;li&gt;Test it&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;curl https:&#x2F;&#x2F;example.com&#x2F;hello.wasm
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;</content>
+	</entry>
+</feed>
