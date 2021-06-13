@@ -5,8 +5,32 @@
 	<link href="https://marcopolo.io/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="https://marcopolo.io"/>
 	<generator uri="https://www.getzola.org/">Zola</generator>
-	<updated>2021-05-10T00:00:00+00:00</updated>
+	<updated>2021-06-13T00:00:00+00:00</updated>
 	<id>https://marcopolo.io/atom.xml</id>
+	
+	<entry xml:lang="en">
+		<title>New Keyboard</title>
+		<published>2021-06-13T00:00:00+00:00</published>
+		<updated>2021-06-13T00:00:00+00:00</updated>
+		<link href="https://marcopolo.io/life/keyboard/" type="text/html"/>
+		<id>https://marcopolo.io/life/keyboard/</id>
+		<content type="html">&lt;p&gt;I got around to building this new keyboard. It&#x27;s essentially the &lt;a href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;adereth&#x2F;status&#x2F;852975999905964032&quot;&gt;lightcycle
+version&lt;&#x2F;a&gt; of the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;adereth&#x2F;dactyl-keyboard&quot;&gt;Dactyl
+keyboard&lt;&#x2F;a&gt;. The few differences are
+that the space and port for the board is bigger to accommodate a
+&lt;a href=&quot;https:&#x2F;&#x2F;nicekeyboards.com&#x2F;nice-nano&#x2F;&quot;&gt;nice!nano&lt;&#x2F;a&gt; board with pins.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;life&#x2F;kb1.jpg&quot; alt=&quot;My new keyboard&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The keyboard is wireless thanks to the nice!nano. The board has a USB-C
+connector, but I added these &lt;a href=&quot;https:&#x2F;&#x2F;www.amazon.com&#x2F;Magnetic-Charging-CAFELE-Braided-Compatible&#x2F;dp&#x2F;B08BLJ62J8&quot;&gt;magnetic charging and data
+cables&lt;&#x2F;a&gt;
+to make charging and connecting easy and lessen the force on the port on the
+board.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;life&#x2F;port.jpg&quot; alt=&quot;Charging port&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;I can also sling the keyboard halves with some cord and wear it as a stylish
+scarf.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;life&#x2F;carry.jpg&quot; alt=&quot;Slung keyboard&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
 	
 	<entry xml:lang="en">
 		<title>Declarative Dev Environments</title>
