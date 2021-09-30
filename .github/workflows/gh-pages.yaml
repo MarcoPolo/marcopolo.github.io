@@ -24,6 +24,17 @@ jobs:
           name: marcopolo-blog
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build
+      #  nix build produces a symlink to the result in nix-store
+      #  but web3.storage action expects this to not be a symlink. Since it runs in a separate docker container.
+      #  Not sure if it's possible to mount the nix path as a volume in the docker container.
+      - run: mkdir result-for-web3
+      - run: cp -r result/* result-for-web3
+      - name: Push to web3.storage
+        uses: web3-storage/add-to-web3@v1
+        id: web3
+        with:
+          web3_token: ${{ secrets.WEB3_STORAGE_TOKEN }}
+          path_to_add: ./result-for-web3
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
