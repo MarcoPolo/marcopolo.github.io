@@ -48,22 +48,20 @@ set and make those features a &lt;em&gt;joy&lt;&#x2F;em&gt; to use.&lt;&#x2F;p&g
 &lt;p&gt;The biggest change was converting Jekyll&#x27;s front-matter (the stuff at the top
 of the md files) format into Zola&#x27;s front-matter format. Which was changing
 this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;---
+&lt;pre&gt;&lt;code&gt;---
 layout: post
 title: Interacting with Go from React Native through JSI
 categories: javascript react-native jsi go
 ---
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;into this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+++
+&lt;pre&gt;&lt;code&gt;+++
 title = &amp;quot;Interacting with Go from React Native through JSI&amp;quot;
 [taxonomies]
 tags = [&amp;quot;javascript&amp;quot;, &amp;quot;react-native&amp;quot;, &amp;quot;JSI&amp;quot;, &amp;quot;Go&amp;quot;]
 +++
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;There was also a slight rewrite in the template files that was necessary
 since Zola uses the &lt;a href=&quot;https:&#x2F;&#x2F;tera.netlify.com&quot;&gt;Tera Templating Engine&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;The rest was just moving (I&#x27;d argue organizing) files around.&lt;&#x2F;p&gt;

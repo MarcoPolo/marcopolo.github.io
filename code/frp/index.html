@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -55,9 +55,8 @@ here translate pretty easily in any language and UI system.</p>
 <h2 id="streams-and-arrays">Streams and arrays</h2>
 <p>You can imagine streams of data as a set of values over time.</p>
 <p>A stream of numbers representing a counter would look like:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">[0,1,2,3,4,5,6,...]
-</span></code></pre>
+<pre><code>[0,1,2,3,4,5,6,...]
+</code></pre>
 <p>Each number is essentially a snapshot of the value at that time.</p>
 <p>Streams are similar to arrays, but the main difference is time.
 An immutable array has all the values it will ever have when it is created, while a stream represents all the values that have happened and will
@@ -71,21 +70,20 @@ adding 1 for every guest. If we wanted to know how much each guest spent
 we would map against a function that tells us the guest's bill.</p>
 <p>This is just a normal array with normal map/reduce construct.
 For completeness here's the equivalent code.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">var </span><span style="color:#bf616a;">guests </span><span style="color:#c0c5ce;">= [&quot;</span><span style="color:#a3be8c;">amy</span><span style="color:#c0c5ce;">&quot;, &quot;</span><span style="color:#a3be8c;">sally</span><span style="color:#c0c5ce;">&quot;, &quot;</span><span style="color:#a3be8c;">bob</span><span style="color:#c0c5ce;">&quot;];
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">bills </span><span style="color:#c0c5ce;">= { amy: </span><span style="color:#d08770;">22.5</span><span style="color:#c0c5ce;">, sally: </span><span style="color:#d08770;">67.0</span><span style="color:#c0c5ce;">, bob: </span><span style="color:#d08770;">6.0 </span><span style="color:#c0c5ce;">};
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">var guests = [&quot;amy&quot;, &quot;sally&quot;, &quot;bob&quot;];
+var bills = { amy: 22.5, sally: 67.0, bob: 6.0 };
 
-</span><span style="color:#65737e;">// Count the guests
-</span><span style="color:#bf616a;">guests</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">reduce</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(sum, guest) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">sum </span><span style="color:#c0c5ce;">+ </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
-}, </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">);
-</span><span style="color:#65737e;">// =&gt; 3
-// Get the bills
-</span><span style="color:#bf616a;">guests</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">map</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(guest) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">bills</span><span style="color:#c0c5ce;">[</span><span style="color:#bf616a;">guest</span><span style="color:#c0c5ce;">];
+&#x2F;&#x2F; Count the guests
+guests.reduce(function(sum, guest) {
+  return sum + 1;
+}, 0);
+&#x2F;&#x2F; =&gt; 3
+&#x2F;&#x2F; Get the bills
+guests.map(function(guest) {
+  return bills[guest];
 });
-</span><span style="color:#65737e;">// =&gt; [22.5, 67, 6]
-</span></code></pre>
+&#x2F;&#x2F; =&gt; [22.5, 67, 6]
+</code></pre>
 <p>Unfortunately Sally had some bad fish and died after eating at your
 restaurant, so everyone has cancelled their reservations and you are
 now a fast food place. In this case you don't have a list of guests,
@@ -96,114 +94,106 @@ but since we are operating over a stream that never ends, the values
 from map/reduce themselves become streams that never end.</p>
 <p>Here is some equivalent pseudo code for streams that calculates
 the <code>guestCounts</code> and the <code>guestBills</code>.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#bf616a;">guests      </span><span style="color:#c0c5ce;">= [... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#bf616a;">Frank</span><span style="color:#c0c5ce;">, ... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#bf616a;">Jack</span><span style="color:#c0c5ce;">, ... ]
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">guests      = [... time passes ..., Frank, ... time passes ..., Jack, ... ]
 
-</span><span style="color:#bf616a;">guestCounts </span><span style="color:#c0c5ce;">= [... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">,     ... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, ... ]
-</span><span style="color:#bf616a;">guestBills </span><span style="color:#c0c5ce;">=  [... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#d08770;">5.50</span><span style="color:#c0c5ce;">,  ... </span><span style="color:#bf616a;">time passes </span><span style="color:#c0c5ce;">..., </span><span style="color:#d08770;">6.50</span><span style="color:#c0c5ce;">, ... ]
-</span></code></pre>
+guestCounts = [... time passes ..., 1,     ... time passes ..., 2, ... ]
+guestBills =  [... time passes ..., 5.50,  ... time passes ..., 6.50, ... ]
+</code></pre>
 <p>So a stream is just like an array that never ends, and represents
 snapshots of time.</p>
 <p>Now that we have an intuitive idea what streams are, we can actually
 implement them.</p>
 <h2 id="streams-of-data">Streams of data</h2>
 <p>A stream of numbers representing a counter would look like:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">[0,1,2,3,4,5,6,...]
-</span></code></pre>
+<pre><code>[0,1,2,3,4,5,6,...]
+</code></pre>
 <p>If we wanted to keep track of how long someone was on our page,
 we could just display the latest value of the counter stream
 in our UI and that would be enough.</p>
 <p>A more involved example: Imagine we had a stream of data
 that represents the keys pressed on the keyboard.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">[&quot;p&quot;,&quot;w&quot;,&quot;n&quot;,&quot;2&quot;,&quot;o&quot;,&quot;w&quot;,&quot;n&quot;,...]
-</span></code></pre>
+<pre><code>[&quot;p&quot;,&quot;w&quot;,&quot;n&quot;,&quot;2&quot;,&quot;o&quot;,&quot;w&quot;,&quot;n&quot;,...]
+</code></pre>
 <p>Now we want to have a stream that represents the state of the system,
 say the amount of keys pressed.</p>
 <p>Our key count stream would look like:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">[&quot;p&quot;,&quot;w&quot;,&quot;n&quot;,&quot;2&quot;,&quot;o&quot;,&quot;w&quot;,&quot;n&quot;,...]
+<pre><code>[&quot;p&quot;,&quot;w&quot;,&quot;n&quot;,&quot;2&quot;,&quot;o&quot;,&quot;w&quot;,&quot;n&quot;,...]
 =&gt;
 [ 1,  2,  3,  4,  5,  6,  7, ...]
-</span></code></pre>
+</code></pre>
 <p>This transformation would happen with a reducing function.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keyCountReducer </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(reducedValue, streamSnapshot) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">reducedValue </span><span style="color:#c0c5ce;">+ </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
-</span></code></pre>
+</code></pre>
 <p>This function takes in the stream value, and a reduced value so far, and
 returns a new reduced value. In this case a simple increment.</p>
 <p>We've talked about streams for a while now, let's implement them.</p>
 <p>In the following code, we create a function that will return an object with two
 methods: <code>observe</code> for registering event listeners and <code>update</code> for adding a value
 to the stream.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// A function to make streams for us
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">streamMaker </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">() {
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">registeredListeners </span><span style="color:#c0c5ce;">= [];
-  </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">{
-    </span><span style="color:#65737e;">// Have an observe function, so
-    // people who are interested can
-    // get notified when there is an update
-    </span><span style="color:#8fa1b3;">observe</span><span style="color:#c0c5ce;">: </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(callback) {
-      </span><span style="color:#bf616a;">registeredListeners</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">push</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">callback</span><span style="color:#c0c5ce;">);
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; A function to make streams for us
+var streamMaker = function() {
+  var registeredListeners = [];
+  return {
+    &#x2F;&#x2F; Have an observe function, so
+    &#x2F;&#x2F; people who are interested can
+    &#x2F;&#x2F; get notified when there is an update
+    observe: function(callback) {
+      registeredListeners.push(callback);
     },
 
-    </span><span style="color:#65737e;">// Add a value to this stream
-    // Once added, will notify all
-    // interested parties
-    </span><span style="color:#8fa1b3;">update</span><span style="color:#c0c5ce;">: </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-      </span><span style="color:#bf616a;">registeredListeners</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">forEach</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(cb) {
-        </span><span style="color:#bf616a;">cb</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">);
+    &#x2F;&#x2F; Add a value to this stream
+    &#x2F;&#x2F; Once added, will notify all
+    &#x2F;&#x2F; interested parties
+    update: function(value) {
+      registeredListeners.forEach(function(cb) {
+        cb(value);
       });
     }
   };
 };
-</span></code></pre>
+</code></pre>
 <p>We also want to make a helper function that will create a new reduced stream
 given an existing <code>stream</code>, a <code>reducingFunction</code>, and an <code>initialReducedValue</code>:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// A function to make a new stream from an existing stream
-// a reducing function, and an initial reduced value
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">reducedStream </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(stream, reducingFunction, initialReducedValue) {
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">newStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">streamMaker</span><span style="color:#c0c5ce;">();
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">reducedValue </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">initialReducedValue</span><span style="color:#c0c5ce;">;
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; A function to make a new stream from an existing stream
+&#x2F;&#x2F; a reducing function, and an initial reduced value
+var reducedStream = function(stream, reducingFunction, initialReducedValue) {
+  var newStream = streamMaker();
+  var reducedValue = initialReducedValue;
 
-  </span><span style="color:#bf616a;">stream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(streamSnapshotValue) {
-    </span><span style="color:#bf616a;">reducedValue </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">reducingFunction</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">reducedValue</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">streamSnapshotValue</span><span style="color:#c0c5ce;">);
-    </span><span style="color:#bf616a;">newStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">update</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">reducedValue</span><span style="color:#c0c5ce;">);
+  stream.observe(function(streamSnapshotValue) {
+    reducedValue = reducingFunction(reducedValue, streamSnapshotValue);
+    newStream.update(reducedValue);
   });
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">newStream</span><span style="color:#c0c5ce;">;
+  return newStream;
 };
-</span></code></pre>
+</code></pre>
 <p>Now to implement the keypress stream and count stream.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// Our reducer from before
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keyCountReducer </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(reducedValue, streamSnapshot) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">reducedValue </span><span style="color:#c0c5ce;">+ </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; Our reducer from before
+var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
 
-</span><span style="color:#65737e;">// Create the keypress stream
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keypressStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">streamMaker</span><span style="color:#c0c5ce;">();
-</span><span style="color:#65737e;">// an observer will have that side effect of printing out to the console
-</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(v) {
-  console.</span><span style="color:#96b5b4;">log</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">key: </span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">v</span><span style="color:#c0c5ce;">);
+&#x2F;&#x2F; Create the keypress stream
+var keypressStream = streamMaker();
+&#x2F;&#x2F; an observer will have that side effect of printing out to the console
+keypressStream.observe(function(v) {
+  console.log(&quot;key: &quot;, v);
 });
 
-</span><span style="color:#65737e;">// Whenever we press a key, we&#39;ll update the stream to be the char code.
-</span><span style="color:#ebcb8b;">document</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">onkeypress </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(e) {
-  </span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">update</span><span style="color:#c0c5ce;">(</span><span style="color:#ebcb8b;">String</span><span style="color:#c0c5ce;">.</span><span style="color:#96b5b4;">fromCharCode</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">e</span><span style="color:#c0c5ce;">.charCode));
+&#x2F;&#x2F; Whenever we press a key, we&#x27;ll update the stream to be the char code.
+document.onkeypress = function(e) {
+  keypressStream.update(String.fromCharCode(e.charCode));
 };
 
-</span><span style="color:#65737e;">// Using our reducedStream helper function we can make a new stream
-// That reduces the keypresses into a stream of key counts
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">countStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">reducedStream</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">keyCountReducer</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">);
-</span><span style="color:#bf616a;">countStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(v) {
-  console.</span><span style="color:#96b5b4;">log</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">Count: </span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">v</span><span style="color:#c0c5ce;">);
+&#x2F;&#x2F; Using our reducedStream helper function we can make a new stream
+&#x2F;&#x2F; That reduces the keypresses into a stream of key counts
+var countStream = reducedStream(keypressStream, keyCountReducer, 0);
+countStream.observe(function(v) {
+  console.log(&quot;Count: &quot;, v);
 });
-</span></code></pre>
+</code></pre>
 <p>Now with the new stream we can display it like we did before.</p>
 <p>Which leads us into our next point...</p>
 <h2 id="rendering-uis-given-data">Rendering UIs given data</h2>
@@ -212,54 +202,52 @@ let's actually show something off.</p>
 <p>This is where React.js shines, but for the purpose of this post we'll
 build our own system.</p>
 <p>Let's say at one point in time our data looks like:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">{&quot;</span><span style="color:#a3be8c;">Count</span><span style="color:#c0c5ce;">&quot;:</span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">}
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">{&quot;Count&quot;:1}
+</code></pre>
 <p>And we want to render a UI that represents this information.
 So we'll write a simple piece of JS that renders html directly from the map.
 To keep it easy, we'll use the keys as div ids.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">//Pure Function to create the dom nodes
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">createDOMNode </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(key, dataMapOrValue) {
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">div </span><span style="color:#c0c5ce;">= document.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">div</span><span style="color:#c0c5ce;">&quot;);
-  </span><span style="color:#bf616a;">div</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">setAttribute</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">id</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">key</span><span style="color:#c0c5ce;">);
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F;Pure Function to create the dom nodes
+var createDOMNode = function(key, dataMapOrValue) {
+  var div = document.createElement(&quot;div&quot;);
+  div.setAttribute(&quot;id&quot;, key);
 
-  </span><span style="color:#65737e;">// Recurse for children
-  </span><span style="color:#b48ead;">if </span><span style="color:#c0c5ce;">(typeof </span><span style="color:#bf616a;">dataMapOrValue </span><span style="color:#c0c5ce;">=== &quot;</span><span style="color:#a3be8c;">object</span><span style="color:#c0c5ce;">&quot; &amp;&amp; </span><span style="color:#bf616a;">dataMapOrValue </span><span style="color:#c0c5ce;">!== </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">) {
-    </span><span style="color:#ebcb8b;">Object</span><span style="color:#c0c5ce;">.</span><span style="color:#96b5b4;">keys</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">dataMapOrValue</span><span style="color:#c0c5ce;">).</span><span style="color:#bf616a;">forEach</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(childKey) {
-      </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">child </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">createDOMNode</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">childKey</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">dataMapOrValue</span><span style="color:#c0c5ce;">[</span><span style="color:#bf616a;">childKey</span><span style="color:#c0c5ce;">]);
-      </span><span style="color:#bf616a;">div</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">appendChild</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">child</span><span style="color:#c0c5ce;">);
+  &#x2F;&#x2F; Recurse for children
+  if (typeof dataMapOrValue === &quot;object&quot; &amp;&amp; dataMapOrValue !== null) {
+    Object.keys(dataMapOrValue).forEach(function(childKey) {
+      var child = createDOMNode(childKey, dataMapOrValue[childKey]);
+      div.appendChild(child);
     });
-  } </span><span style="color:#b48ead;">else </span><span style="color:#c0c5ce;">{
-    </span><span style="color:#65737e;">// There are no children just a value.
-    // We set the data to be the content of the node
-    // Note this does not protect against XSS
-    </span><span style="color:#bf616a;">div</span><span style="color:#c0c5ce;">.innerHTML = </span><span style="color:#bf616a;">dataMapOrValue</span><span style="color:#c0c5ce;">;
+  } else {
+    &#x2F;&#x2F; There are no children just a value.
+    &#x2F;&#x2F; We set the data to be the content of the node
+    &#x2F;&#x2F; Note this does not protect against XSS
+    div.innerHTML = dataMapOrValue;
   }
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">div</span><span style="color:#c0c5ce;">;
+  return div;
 };
 
-</span><span style="color:#65737e;">// Render Data
+&#x2F;&#x2F; Render Data
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">render </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(rootID, appState) {
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">root</span><span style="color:#c0c5ce;">;
-  </span><span style="color:#65737e;">// Check if the root id is even defined
-  </span><span style="color:#b48ead;">if </span><span style="color:#c0c5ce;">(document.</span><span style="color:#bf616a;">getElementById</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">rootID</span><span style="color:#c0c5ce;">) === </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">) {
-    </span><span style="color:#65737e;">// We need to add this root id so we can use it later
-    </span><span style="color:#bf616a;">root </span><span style="color:#c0c5ce;">= document.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">div</span><span style="color:#c0c5ce;">&quot;);
-    </span><span style="color:#bf616a;">root</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">setAttribute</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">id</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">rootID</span><span style="color:#c0c5ce;">);
-    document.body.</span><span style="color:#bf616a;">appendChild</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">root</span><span style="color:#c0c5ce;">);
+var render = function(rootID, appState) {
+  var root;
+  &#x2F;&#x2F; Check if the root id is even defined
+  if (document.getElementById(rootID) === null) {
+    &#x2F;&#x2F; We need to add this root id so we can use it later
+    root = document.createElement(&quot;div&quot;);
+    root.setAttribute(&quot;id&quot;, rootID);
+    document.body.appendChild(root);
   }
 
-  </span><span style="color:#bf616a;">root </span><span style="color:#c0c5ce;">= document.</span><span style="color:#bf616a;">getElementById</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">rootID</span><span style="color:#c0c5ce;">);
-  </span><span style="color:#65737e;">// Clear all the existing content in the page
-  </span><span style="color:#bf616a;">root</span><span style="color:#c0c5ce;">.innerHTML = &quot;&quot;;
-  </span><span style="color:#65737e;">// render the appState back in
-  </span><span style="color:#bf616a;">root</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">appendChild</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">createDOMNode</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">rootID</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">appState</span><span style="color:#c0c5ce;">));
+  root = document.getElementById(rootID);
+  &#x2F;&#x2F; Clear all the existing content in the page
+  root.innerHTML = &quot;&quot;;
+  &#x2F;&#x2F; render the appState back in
+  root.appendChild(createDOMNode(rootID, appState));
 };
 
-</span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">counter</span><span style="color:#c0c5ce;">&quot;, { Count: </span><span style="color:#d08770;">1 </span><span style="color:#c0c5ce;">});
-</span></code></pre>
+render(&quot;counter&quot;, { Count: 1 });
+</code></pre>
 <p>After running this code on a <a href="about:blank">blank page</a> we have a page
 that says <code>1</code>, it worked!</p>
 <p>A bit boring though, how about we make it a bit more interesting by updating
@@ -270,18 +258,18 @@ render a page given some data. Now we'll tie all the parts together; render
 the stream as it changes over time.</p>
 <p>It really is simple. All we have to do is re-render whenever we receive
 a new value on the stream.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// Let&#39;s observe the countstream and render when we get an update
-</span><span style="color:#bf616a;">countStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-  </span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">counter</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">);
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; Let&#x27;s observe the countstream and render when we get an update
+countStream.observe(function(value) {
+  render(&quot;counter&quot;, value);
 });
 
-</span><span style="color:#65737e;">// And if we wanted to render what the keypress stream tells us, we can do so
-// just as easily
-</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-  </span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">keypress</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">);
+&#x2F;&#x2F; And if we wanted to render what the keypress stream tells us, we can do so
+&#x2F;&#x2F; just as easily
+keypressStream.observe(function(value) {
+  render(&quot;keypress&quot;, value);
 });
-</span></code></pre><h2 id="single-app-state">Single App State</h2>
+</code></pre>
+<h2 id="single-app-state">Single App State</h2>
 <p>A single app state means that there is only one object that encapsulates the
 state of your application.</p>
 <p>Benefits:</p>
@@ -301,37 +289,36 @@ scattered around the application.</p>
 <p>No more.</p>
 <p>A single app state is a natural end to the directed acyclic graph that
 we've created with streams.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">stream1 -&gt; mappedStream
+<pre><code>stream1 -&gt; mappedStream
                         \
                          mergedStream -&gt; appStateStream
-                        /
+                        &#x2F;
 stream2 -&gt; reducedStream
-</span></code></pre><h2 id="implementing-single-app-state">Implementing Single App State</h2>
+</code></pre>
+<h2 id="implementing-single-app-state">Implementing Single App State</h2>
 <p>In our previous example we had two pieces of state,
 the counter and the keypress. We could merge these together into one stream, and
 then form a single app state from that stream.</p>
 <p>First let's make a helper function that will merge streams for us. To keep it
 general and simple we'll take only two streams and a merging function.
 It will return a new stream which is the merge of both streams with the mergeFn.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// A merge streams helper function
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">mergeStreams </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(streamA, streamB, mergeFn) {
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">streamData </span><span style="color:#c0c5ce;">= [</span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">];
-  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">newStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">streamMaker</span><span style="color:#c0c5ce;">();
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; A merge streams helper function
+var mergeStreams = function(streamA, streamB, mergeFn) {
+  var streamData = [null, null];
+  var newStream = streamMaker();
 
-  </span><span style="color:#bf616a;">streamA</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-    </span><span style="color:#bf616a;">streamData</span><span style="color:#c0c5ce;">[</span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">] = </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">;
-    </span><span style="color:#bf616a;">newStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">update</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">mergeFn</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">apply</span><span style="color:#c0c5ce;">(</span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">streamData</span><span style="color:#c0c5ce;">));
+  streamA.observe(function(value) {
+    streamData[0] = value;
+    newStream.update(mergeFn.apply(null, streamData));
   });
-  </span><span style="color:#bf616a;">streamB</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-    </span><span style="color:#bf616a;">streamData</span><span style="color:#c0c5ce;">[</span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">] = </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">;
-    </span><span style="color:#bf616a;">newStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">update</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">mergeFn</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">apply</span><span style="color:#c0c5ce;">(</span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">streamData</span><span style="color:#c0c5ce;">));
+  streamB.observe(function(value) {
+    streamData[1] = value;
+    newStream.update(mergeFn.apply(null, streamData));
   });
 
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">newStream</span><span style="color:#c0c5ce;">;
+  return newStream;
 };
-</span></code></pre>
+</code></pre>
 <p>This implementation will call the merge function with the latest value from the
 streams or null if the stream hasn't emitted anything yet. This means the output
 can return duplicate values of one of the streams.</p>
@@ -339,47 +326,45 @@ can return duplicate values of one of the streams.</p>
 with immutable datastructures)</p>
 <p>We want to put both the keypress and the counter in one object, so our
 merge function will do just that.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">var </span><span style="color:#bf616a;">mergeIntoObject </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(keypress, counter) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">{ counter: </span><span style="color:#bf616a;">counter</span><span style="color:#c0c5ce;">, keypress: </span><span style="color:#bf616a;">keypress </span><span style="color:#c0c5ce;">};
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">var mergeIntoObject = function(keypress, counter) {
+  return { counter: counter, keypress: keypress };
 };
-</span></code></pre>
+</code></pre>
 <p>Now to create the single app state stream, and render that single app state.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">var </span><span style="color:#bf616a;">appStateStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">mergeStreams</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">countStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">mergeIntoObject</span><span style="color:#c0c5ce;">);
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">var appStateStream = mergeStreams(keypressStream, countStream, mergeIntoObject);
 
-</span><span style="color:#bf616a;">appStateStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-  </span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">app</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">);
+appStateStream.observe(function(value) {
+  render(&quot;app&quot;, value);
 });
-</span></code></pre><h2 id="final-code">Final Code</h2>
+</code></pre>
+<h2 id="final-code">Final Code</h2>
 <p>Most of these functions are library functions that you wouldn't need to implement
 yourself. The final application specific code would look like:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// Create the keypress stream
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keypressStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">streamMaker</span><span style="color:#c0c5ce;">();
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; Create the keypress stream
+var keypressStream = streamMaker();
 
-</span><span style="color:#65737e;">// Whenever we press a key, we&#39;ll update the stream to be the char code.
-</span><span style="color:#ebcb8b;">document</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">onkeypress </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(e) {
-  </span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">update</span><span style="color:#c0c5ce;">(</span><span style="color:#ebcb8b;">String</span><span style="color:#c0c5ce;">.</span><span style="color:#96b5b4;">fromCharCode</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">e</span><span style="color:#c0c5ce;">.charCode));
+&#x2F;&#x2F; Whenever we press a key, we&#x27;ll update the stream to be the char code.
+document.onkeypress = function(e) {
+  keypressStream.update(String.fromCharCode(e.charCode));
 };
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keyCountReducer </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(reducedValue, streamSnapshot) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">reducedValue </span><span style="color:#c0c5ce;">+ </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
+var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
-</span><span style="color:#65737e;">// Using our reducedStream helper function we can make a new stream
-// That reduces the keypresses into a stream of key counts
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">countStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">reducedStream</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">keyCountReducer</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">);
+&#x2F;&#x2F; Using our reducedStream helper function we can make a new stream
+&#x2F;&#x2F; That reduces the keypresses into a stream of key counts
+var countStream = reducedStream(keypressStream, keyCountReducer, 0);
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">mergeIntoObject </span><span style="color:#c0c5ce;">= </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(keypress, counter) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">{ counter: </span><span style="color:#bf616a;">counter</span><span style="color:#c0c5ce;">, keypress: </span><span style="color:#bf616a;">keypress </span><span style="color:#c0c5ce;">};
+var mergeIntoObject = function(keypress, counter) {
+  return { counter: counter, keypress: keypress };
 };
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">appStateStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">mergeStreams</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">countStream</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">mergeIntoObject</span><span style="color:#c0c5ce;">);
+var appStateStream = mergeStreams(keypressStream, countStream, mergeIntoObject);
 
-</span><span style="color:#bf616a;">appStateStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">observe</span><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(value) {
-  </span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">app</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#bf616a;">value</span><span style="color:#c0c5ce;">);
+appStateStream.observe(function(value) {
+  render(&quot;app&quot;, value);
 });
-</span></code></pre>
+</code></pre>
 <p>You can see a running version of this code <a href="http://jsfiddle.net/Ld3o1Lm5/2/">here</a></p>
 <h2 id="the-render-a-closer-look">The render, a closer look</h2>
 <p>So what does the render actually do?</p>
@@ -418,64 +403,63 @@ however those already exists (e.g. <a href="http://baconjs.github.io/">Bacon.js<
 <code>componentWillMount</code> is a function that gets called before the component
 is placed on the DOM.</p>
 <p><code>&lt;stream&gt;.scan</code> is our reducing function in Bacon.js parlance.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// Our streams just like before
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">keypressStream </span><span style="color:#c0c5ce;">= </span><span style="color:#ebcb8b;">Bacon</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">fromEventTarget</span><span style="color:#c0c5ce;">(document.body, &quot;</span><span style="color:#a3be8c;">keypress</span><span style="color:#c0c5ce;">&quot;).</span><span style="color:#bf616a;">map</span><span style="color:#c0c5ce;">(
-  </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(e) {
-    </span><span style="color:#b48ead;">return </span><span style="color:#ebcb8b;">String</span><span style="color:#c0c5ce;">.</span><span style="color:#96b5b4;">fromCharCode</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">e</span><span style="color:#c0c5ce;">.charCode);
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">&#x2F;&#x2F; Our streams just like before
+var keypressStream = Bacon.fromEventTarget(document.body, &quot;keypress&quot;).map(
+  function(e) {
+    return String.fromCharCode(e.charCode);
   }
 );
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">countStream </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">scan</span><span style="color:#c0c5ce;">(</span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">, </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(count, key) {
-  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">count </span><span style="color:#c0c5ce;">+ </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
+var countStream = keypressStream.scan(0, function(count, key) {
+  return count + 1;
 });
 
-</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">KeyPressComponent </span><span style="color:#c0c5ce;">= </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">createClass</span><span style="color:#c0c5ce;">({
-  </span><span style="color:#8fa1b3;">getInitialState</span><span style="color:#c0c5ce;">: </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">() {
-    </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">{ count: </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">, keypress: &quot;</span><span style="color:#a3be8c;">&lt;press a key&gt;</span><span style="color:#c0c5ce;">&quot;, totalWords: &quot;&quot; };
+var KeyPressComponent = React.createClass({
+  getInitialState: function() {
+    return { count: 0, keypress: &quot;&lt;press a key&gt;&quot;, totalWords: &quot;&quot; };
   },
-  </span><span style="color:#8fa1b3;">componentWillMount</span><span style="color:#c0c5ce;">: </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">() {
-    </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.props.countStream.</span><span style="color:#bf616a;">onValue</span><span style="color:#c0c5ce;">(
-      </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(count) {
-        </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">setState</span><span style="color:#c0c5ce;">({ count: </span><span style="color:#bf616a;">count </span><span style="color:#c0c5ce;">});
-      }.</span><span style="color:#bf616a;">bind</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">)
+  componentWillMount: function() {
+    this.props.countStream.onValue(
+      function(count) {
+        this.setState({ count: count });
+      }.bind(this)
     );
 
-    </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.props.keypressStream.</span><span style="color:#bf616a;">onValue</span><span style="color:#c0c5ce;">(
-      </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(key) {
-        </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">setState</span><span style="color:#c0c5ce;">({ keypress: </span><span style="color:#bf616a;">key </span><span style="color:#c0c5ce;">});
-      }.</span><span style="color:#bf616a;">bind</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">)
+    this.props.keypressStream.onValue(
+      function(key) {
+        this.setState({ keypress: key });
+      }.bind(this)
     );
 
-    </span><span style="color:#65737e;">// Add something extra because why not
-    </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.props.keypressStream
-      .</span><span style="color:#bf616a;">scan</span><span style="color:#c0c5ce;">(&quot;&quot;, </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(totalWords, key) {
-        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">totalWords </span><span style="color:#c0c5ce;">+ </span><span style="color:#bf616a;">key</span><span style="color:#c0c5ce;">;
+    &#x2F;&#x2F; Add something extra because why not
+    this.props.keypressStream
+      .scan(&quot;&quot;, function(totalWords, key) {
+        return totalWords + key;
       })
-      .</span><span style="color:#bf616a;">onValue</span><span style="color:#c0c5ce;">(
-        </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">(totalWords) {
-          </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">setState</span><span style="color:#c0c5ce;">({ totalWords: </span><span style="color:#bf616a;">totalWords </span><span style="color:#c0c5ce;">});
-        }.</span><span style="color:#bf616a;">bind</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">)
+      .onValue(
+        function(totalWords) {
+          this.setState({ totalWords: totalWords });
+        }.bind(this)
       );
   },
-  </span><span style="color:#8fa1b3;">render</span><span style="color:#c0c5ce;">: </span><span style="color:#b48ead;">function</span><span style="color:#c0c5ce;">() {
-    </span><span style="color:#b48ead;">return </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.DOM.</span><span style="color:#bf616a;">div</span><span style="color:#c0c5ce;">(
-      </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">,
-      </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">h1</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, &quot;</span><span style="color:#a3be8c;">Count: </span><span style="color:#c0c5ce;">&quot; + </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.state.count),
-      </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">h1</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, &quot;</span><span style="color:#a3be8c;">Keypress: </span><span style="color:#c0c5ce;">&quot; + </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.state.keypress),
-      </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">h1</span><span style="color:#c0c5ce;">&quot;, </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">, &quot;</span><span style="color:#a3be8c;">Total words: </span><span style="color:#c0c5ce;">&quot; + </span><span style="color:#bf616a;">this</span><span style="color:#c0c5ce;">.state.totalWords)
+  render: function() {
+    return React.DOM.div(
+      null,
+      React.createElement(&quot;h1&quot;, null, &quot;Count: &quot; + this.state.count),
+      React.createElement(&quot;h1&quot;, null, &quot;Keypress: &quot; + this.state.keypress),
+      React.createElement(&quot;h1&quot;, null, &quot;Total words: &quot; + this.state.totalWords)
     );
   }
 });
 
-</span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">render</span><span style="color:#c0c5ce;">(
-  </span><span style="color:#ebcb8b;">React</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">createElement</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">KeyPressComponent</span><span style="color:#c0c5ce;">, {
-    keypressStream: </span><span style="color:#bf616a;">keypressStream</span><span style="color:#c0c5ce;">,
-    countStream: </span><span style="color:#bf616a;">countStream
-  </span><span style="color:#c0c5ce;">}),
+React.render(
+  React.createElement(KeyPressComponent, {
+    keypressStream: keypressStream,
+    countStream: countStream
+  }),
   document.body
 );
-</span></code></pre>
+</code></pre>
 <p>jsfiddle for this code <a href="http://jsfiddle.net/jf2j62wj/10/">here</a>.</p>
 <h2 id="closing-notes">Closing Notes</h2>
 <p><a href="https://facebook.github.io/react/">React</a> is great for reactively rendering the ui.

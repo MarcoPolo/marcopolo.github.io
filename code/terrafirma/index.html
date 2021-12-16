@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -43,12 +43,11 @@
 <h2 id="how-much-faster">How much faster?</h2>
 <p>On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.</p>
 <p>Following <a href="https://blog.iron.io/the-overhead-of-docker-run/">this experiment</a> I get these results:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">Running: ./hello.sh
+<pre><code>Running: .&#x2F;hello.sh
 avg: 3.516431ms
-Running: docker run treeder/hello:sh
+Running: docker run treeder&#x2F;hello:sh
 avg: 692.306769ms
-Running: docker run --rm treeder/hello:sh
+Running: docker run --rm treeder&#x2F;hello:sh
 avg: 725.912422ms
 Running: docker start -a reuse
 avg: 655.059021ms
@@ -56,7 +55,7 @@ Running: node hello.js
 avg: 79.233337ms
 Running: wasmer run wasi-hello-world.wasm
 avg: 15.155896ms
-</span></code></pre>
+</code></pre>
 <p>When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.</p>
 <p><img src="/code/wasm-graph.png" alt="Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe." title="Safety vs Overhead" /></p>
 <p>The trend is that if you want safety and isolation, you must pay for it with overhead. WASM's exception to that rule is what I think makes it so promising and interesting. Wasm provides the fastest way to run arbitrary user code in a sandboxed environment.</p>
@@ -78,61 +77,56 @@ avg: 15.155896ms
 <ol>
 <li>Point your domain to TerraFirma servers (<code>terrafirma.marcopolo.io</code> or <code>52.53.126.109</code>) with an A record, and set a <code>TXT</code> record to point to your shared folder (e.g. <code>&quot;kbp=/keybase/private/&lt;my_keybase_username&gt;,kbwasm/&quot;</code>)</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">
+<pre><code>
 example.com 300 A terrafirma.marcopolo.io
 
-_keybase_pages.example.com 300 TXT &quot;kbp=/keybase/private/&lt;my_keybase_username&gt;,kbwasm/&quot;
+_keybase_pages.example.com 300 TXT &quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&lt;my_keybase_username&gt;,kbwasm&#x2F;&quot;
 
-</span></code></pre>
+</code></pre>
 <ol start="2">
 <li>Verify the DNS records are correct</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">
+<pre><code>
 $ dig example.com A
 ...
 ;; ANSWER SECTION:
 wasm.marcopolo.io.      300     IN      A       52.53.126.109
 ...
 
-</span></code></pre><br/>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">
+</code></pre>
+<br/>
+<pre><code>
 $ dig _keybase_pages.example.com TXT
 ...
 ;; ANSWER SECTION:
-_keybase_pages.example.com &lt;number&gt; IN TXT &quot;kbp=/keybase/private/&lt;my_keybase_username&gt;,kbpbot/&quot;
+_keybase_pages.example.com &lt;number&gt; IN TXT &quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&lt;my_keybase_username&gt;,kbpbot&#x2F;&quot;
 ...
 
-</span></code></pre>
+</code></pre>
 <ol start="3">
 <li>Clone the Hello World Repo</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">git clone git@github.com:MarcoPolo/terrafirma-hello-world.git
-</span></code></pre>
+<pre><code>git clone git@github.com:MarcoPolo&#x2F;terrafirma-hello-world.git
+</code></pre>
 <ol start="4">
 <li>Build it</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">cd terrafirma-hello-world
+<pre><code>cd terrafirma-hello-world
 cargo build --release
-</span></code></pre>
+</code></pre>
 <ol start="5">
 <li>Deploy it</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">
-cp target/wasm32-unknown-unknown/release/terrafirma_helloworld.wasm /keybase/private/&lt;your_kb_username&gt;,kbwasm/hello.wasm
+<pre><code>
+cp target&#x2F;wasm32-unknown-unknown&#x2F;release&#x2F;terrafirma_helloworld.wasm &#x2F;keybase&#x2F;private&#x2F;&lt;your_kb_username&gt;,kbwasm&#x2F;hello.wasm
 
-</span></code></pre>
+</code></pre>
 <ol start="6">
 <li>Test it</li>
 </ol>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">curl https://example.com/hello.wasm
-</span></code></pre>
+<pre><code>curl https:&#x2F;&#x2F;example.com&#x2F;hello.wasm
+</code></pre>
+
   </article>
   <aside></aside>
 </main>

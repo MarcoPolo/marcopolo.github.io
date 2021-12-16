@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -44,19 +44,18 @@ general idea is you have a stage as your builder and another stage as your
 product. This allows you to have a full development and build container while
 still having a lean production container. The production container only carries
 its runtime dependencies.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">FROM</span><span style="color:#c0c5ce;"> golang:1.7.3
-</span><span style="color:#b48ead;">WORKDIR </span><span style="color:#c0c5ce;">/go/src/github.com/alexellis/href-counter/
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">go get -d -v golang.org/x/net/html
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> app.go .
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+<pre data-lang="dockerfile" class="language-dockerfile "><code class="language-dockerfile" data-lang="dockerfile">FROM golang:1.7.3
+WORKDIR &#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;
+RUN go get -d -v golang.org&#x2F;x&#x2F;net&#x2F;html
+COPY app.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
-</span><span style="color:#b48ead;">FROM</span><span style="color:#c0c5ce;"> alpine:latest
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">apk --no-cache add ca-certificates
-</span><span style="color:#b48ead;">WORKDIR </span><span style="color:#c0c5ce;">/root/
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> --from=</span><span style="color:#bf616a;">0</span><span style="color:#c0c5ce;"> /go/src/github.com/alexellis/href-counter/app .
-CMD [&quot;</span><span style="color:#a3be8c;">./app</span><span style="color:#c0c5ce;">&quot;]
-</span></code></pre>
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR &#x2F;root&#x2F;
+COPY --from=0 &#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;app .
+CMD [&quot;.&#x2F;app&quot;]
+</code></pre>
 <p>(from Docker's <a href="https://docs.docker.com/develop/develop-images/multistage-build/">docs on multi-stage</a>)</p>
 <p>Sounds great, right? What's the catch? Well, it's not always easy to know what the
 runtime dependencies are. For example you may have installed something in /lib
@@ -78,35 +77,34 @@ expectation is that this will result in a minimal production container.</p>
 <h2 id="example">Example</h2>
 <p>As a simple example let's package a &quot;Hello World&quot; program in Rust. The code is
 what you'd expect:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">main</span><span style="color:#c0c5ce;">() {
-    println!(&quot;</span><span style="color:#a3be8c;">Hello, world!</span><span style="color:#c0c5ce;">&quot;);
+<pre data-lang="rust" class="language-rust "><code class="language-rust" data-lang="rust">pub fn main() {
+    println!(&quot;Hello, world!&quot;);
 }
-</span></code></pre><h3 id="nix-build-expression">Nix build expression</h3>
+</code></pre>
+<h3 id="nix-build-expression">Nix build expression</h3>
 <p>If we were just building this locally, we'd just run <code>cargo build --release</code>.
 But we are going to have Nix build this for us so that it can track the runtime
 dependencies. Therefore we need a <code>default.nix</code> file to describe the build
 process. Our <code>default.nix</code> build file looks like this:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">with </span><span style="color:#c0c5ce;">(</span><span style="color:#96b5b4;">import </span><span style="color:#a3be8c;">&lt;nixpkgs&gt; </span><span style="color:#c0c5ce;">{});
-</span><span style="color:#bf616a;">rustPlatform</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">buildRustPackage </span><span style="color:#c0c5ce;">{
-  </span><span style="color:#d08770;">name </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">hello-rust</span><span style="color:#c0c5ce;">&quot;;
-  </span><span style="color:#d08770;">buildInputs </span><span style="color:#c0c5ce;">= [ </span><span style="color:#bf616a;">cargo rustc </span><span style="color:#c0c5ce;">];
-  </span><span style="color:#d08770;">src </span><span style="color:#c0c5ce;">= </span><span style="color:#a3be8c;">./.</span><span style="color:#c0c5ce;">;
-  </span><span style="color:#65737e;"># This is a shasum over our crate dependencies
-  </span><span style="color:#d08770;">cargoSha256 </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">1s4vg081ci6hskb3kk965nxnx384w8xb7n7yc4g93hj55qsk4vw5</span><span style="color:#c0c5ce;">&quot;;
-  </span><span style="color:#65737e;"># Use this to figure out the correct Sha256
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">with (import &lt;nixpkgs&gt; {});
+rustPlatform.buildRustPackage {
+  name = &quot;hello-rust&quot;;
+  buildInputs = [ cargo rustc ];
+  src = .&#x2F;.;
+  # This is a shasum over our crate dependencies
+  cargoSha256 = &quot;1s4vg081ci6hskb3kk965nxnx384w8xb7n7yc4g93hj55qsk4vw5&quot;;
+  # Use this to figure out the correct Sha256
   # cargoSha256 = lib.fakeSha256;
-  </span><span style="color:#d08770;">buildPhase </span><span style="color:#c0c5ce;">= &#39;&#39;</span><span style="color:#a3be8c;">
+  buildPhase = &#x27;&#x27;
     cargo build --release
-  </span><span style="color:#c0c5ce;">&#39;&#39;;
-  </span><span style="color:#d08770;">checkPhase </span><span style="color:#c0c5ce;">= &quot;&quot;;
-  </span><span style="color:#d08770;">installPhase </span><span style="color:#c0c5ce;">= &#39;&#39;</span><span style="color:#a3be8c;">
-    mkdir -p $out/bin
-    cp target/release/hello $out/bin
-  </span><span style="color:#c0c5ce;">&#39;&#39;;
+  &#x27;&#x27;;
+  checkPhase = &quot;&quot;;
+  installPhase = &#x27;&#x27;
+    mkdir -p $out&#x2F;bin
+    cp target&#x2F;release&#x2F;hello $out&#x2F;bin
+  &#x27;&#x27;;
 }
-</span></code></pre>
+</code></pre>
 <p>Breaking down the Nix expression: we specify what our inputs our to our
 build: <code>cargo</code> and <code>rustc</code>; we figure out what the sha256sum is of our crate
 dependencies; and we define some commands to build and install the executable.</p>
@@ -120,44 +118,43 @@ can add Docker to the mix. The goal is to have a builder stage that runs the
 nix-build command, then have a production stage that copies the executable and
 its runtime dependencies from builder. The production stage container will
 therefore have only the minimal amount of stuff needed to run.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;"># Use nix as the builder
-</span><span style="color:#b48ead;">FROM</span><span style="color:#c0c5ce;"> nixos/nix:latest </span><span style="color:#b48ead;">AS </span><span style="color:#bf616a;">builder
+<pre data-lang="Dockerfile" class="language-Dockerfile "><code class="language-Dockerfile" data-lang="Dockerfile"># Use nix as the builder
+FROM nixos&#x2F;nix:latest AS builder
 
-</span><span style="color:#65737e;"># Update the channel so we can get the latest packages
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">nix-channel --update nixpkgs
-</span><span style="color:#b48ead;">
-WORKDIR </span><span style="color:#c0c5ce;">/app
+# Update the channel so we can get the latest packages
+RUN nix-channel --update nixpkgs
 
-</span><span style="color:#65737e;"># Run the builder first without our code to fetch build dependencies.
-# This will fail, but that&#39;s okay. We just want to have the build dependencies
+WORKDIR &#x2F;app
+
+# Run the builder first without our code to fetch build dependencies.
+# This will fail, but that&#x27;s okay. We just want to have the build dependencies
 # cached as a layer. This is just a caching optimization that can be removed.
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> default.nix .
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">nix-build . || true
+COPY default.nix .
+RUN nix-build . || true
 
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> . .
+COPY . .
 
-</span><span style="color:#65737e;"># Now that our code is here we actually build it
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">nix-build .
+# Now that our code is here we actually build it
+RUN nix-build .
 
-</span><span style="color:#65737e;"># Copy all the run time dependencies into /tmp/nix-store-closure
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">mkdir /tmp/nix-store-closure
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">echo &quot;</span><span style="color:#a3be8c;">Output references (Runtime dependencies):</span><span style="color:#c0c5ce;">&quot; $(nix-store -qR result/)
-</span><span style="color:#b48ead;">RUN </span><span style="color:#c0c5ce;">cp -R $(nix-store -qR result/) /tmp/nix-store-closure
+# Copy all the run time dependencies into &#x2F;tmp&#x2F;nix-store-closure
+RUN mkdir &#x2F;tmp&#x2F;nix-store-closure
+RUN echo &quot;Output references (Runtime dependencies):&quot; $(nix-store -qR result&#x2F;)
+RUN cp -R $(nix-store -qR result&#x2F;) &#x2F;tmp&#x2F;nix-store-closure
 
-ENTRYPOINT [ &quot;</span><span style="color:#a3be8c;">/bin/sh</span><span style="color:#c0c5ce;">&quot; ]
+ENTRYPOINT [ &quot;&#x2F;bin&#x2F;sh&quot; ]
 
-</span><span style="color:#65737e;"># Our production stage
-</span><span style="color:#b48ead;">FROM</span><span style="color:#c0c5ce;"> scratch
-</span><span style="color:#b48ead;">WORKDIR </span><span style="color:#c0c5ce;">/app
-</span><span style="color:#65737e;"># Copy the runtime dependencies into /nix/store
-# Note we don&#39;t actually have nix installed on this container. But that&#39;s fine,
-# we don&#39;t need it, the built code only relies on the given files existing, not
+# Our production stage
+FROM scratch
+WORKDIR &#x2F;app
+# Copy the runtime dependencies into &#x2F;nix&#x2F;store
+# Note we don&#x27;t actually have nix installed on this container. But that&#x27;s fine,
+# we don&#x27;t need it, the built code only relies on the given files existing, not
 # Nix.
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> --from=</span><span style="color:#bf616a;">builder</span><span style="color:#c0c5ce;"> /tmp/nix-store-closure /nix/store
-</span><span style="color:#b48ead;">COPY</span><span style="color:#c0c5ce;"> --from=</span><span style="color:#bf616a;">builder</span><span style="color:#c0c5ce;"> /app/result /app
-CMD [&quot;</span><span style="color:#a3be8c;">/app/bin/hello</span><span style="color:#c0c5ce;">&quot;]
-</span></code></pre>
+COPY --from=builder &#x2F;tmp&#x2F;nix-store-closure &#x2F;nix&#x2F;store
+COPY --from=builder &#x2F;app&#x2F;result &#x2F;app
+CMD [&quot;&#x2F;app&#x2F;bin&#x2F;hello&quot;]
+</code></pre>
 <p>If we build this <code>Dockerfile</code> with <code>docker build .</code>, we'll end up with an 33MB
 container. Compare this to a naive
 <a href="https://gist.github.com/MarcoPolo/7953f1ca2691405b5b04659027967336">Dockerfile</a>

@@ -30,12 +30,11 @@
 &lt;p&gt;In the above context, it&#x27;s an implementation detail. I&#x27;m not saying it&#x27;s the wrong or right trade off, I&#x27;m only saying that the reason you have to reach for &lt;code&gt;useMemo&lt;&#x2F;code&gt; when passing around closures is because of how React is implemented. So the quote is accurate.&lt;&#x2F;p&gt;
 &lt;p&gt;Is that a bad thing? That&#x27;s where it gets more subjective. I think it is, because these types of things happen very often and, in a big app, you quickly succumb to death by a thousand cuts (one closure causing a component to re-render isn&#x27;t a big deal, but when you have hundreds of components with various closures it gets hairy).&lt;&#x2F;p&gt;
 &lt;p&gt;The next example OP posts is about setting users in a list.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setUsers&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;([
-  ...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;users&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;filter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(user &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.name !== &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Sebastian&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;),
-  { name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Sebastian&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; }
+&lt;pre data-lang=&quot;js&quot; class=&quot;language-js &quot;&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;setUsers([
+  ...users.filter(user =&amp;gt; user.name !== &amp;quot;Sebastian&amp;quot;),
+  { name: &amp;quot;Sebastian&amp;quot; }
 ]);
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;If you are happy with that syntax, and the tradeoff of having to use &lt;code&gt;key&lt;&#x2F;code&gt; props whenever you display lists, and relying on React&#x27;s heuristics to efficiently update the views corresponding to the list, then React is fine. If, however, you are okay with a different syntax you may be interested in another idea I&#x27;ve seen. The basic idea is you keep track of the diffs themselves instead of the old version vs. the new version. Knowing the diffs directly let you know exactly how to update the views directly so you don&#x27;t have to rely on the &lt;code&gt;key&lt;&#x2F;code&gt; prop, heuristics, and you can efficiently&#x2F;quickly update the View list. This is similar to how &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;immerjs&#x2F;immer&quot;&gt;Immer&lt;&#x2F;a&gt; works. &lt;a href=&quot;https:&#x2F;&#x2F;docs.rs&#x2F;futures-signals&#x2F;0.3.8&#x2F;futures_signals&#x2F;tutorial&#x2F;index.html&quot;&gt;Futures Signals&lt;&#x2F;a&gt; also does this to efficiently send updates of a list to consumers (look at &lt;code&gt;SignalVec&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;stale-closures-in-hooks-are-confusing&quot;&gt;&amp;quot;Stale closures in Hooks are confusing&amp;quot;&lt;&#x2F;h2&gt;
 &lt;p&gt;I agree with OP&#x27;s points here. It&#x27;s important to know where your data is coming from. In the old hook-less style of React, your data was what you got from your props&#x2F;state and nothing else. With hooks, it&#x27;s easier to work with stale data that comes in from outside your props. It&#x27;s a learning curve, but not necessarily bad.&lt;&#x2F;p&gt;
@@ -66,9 +65,8 @@ here translate pretty easily in any language and UI system.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;streams-and-arrays&quot;&gt;Streams and arrays&lt;&#x2F;h2&gt;
 &lt;p&gt;You can imagine streams of data as a set of values over time.&lt;&#x2F;p&gt;
 &lt;p&gt;A stream of numbers representing a counter would look like:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[0,1,2,3,4,5,6,...]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;[0,1,2,3,4,5,6,...]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Each number is essentially a snapshot of the value at that time.&lt;&#x2F;p&gt;
 &lt;p&gt;Streams are similar to arrays, but the main difference is time.
 An immutable array has all the values it will ever have when it is created, while a stream represents all the values that have happened and will
@@ -82,21 +80,20 @@ adding 1 for every guest. If we wanted to know how much each guest spent
 we would map against a function that tells us the guest&#x27;s bill.&lt;&#x2F;p&gt;
 &lt;p&gt;This is just a normal array with normal map&#x2F;reduce construct.
 For completeness here&#x27;s the equivalent code.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guests &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;amy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sally&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bob&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;];
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bills &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= { amy: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;22.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, sally: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;67.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, bob: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;6.0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;};
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;var guests = [&amp;quot;amy&amp;quot;, &amp;quot;sally&amp;quot;, &amp;quot;bob&amp;quot;];
+var bills = { amy: 22.5, sally: 67.0, bob: 6.0 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Count the guests
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guests&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reduce&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(sum, guest) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-}, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; =&amp;gt; 3
-&#x2F;&#x2F; Get the bills
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guests&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(guest) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bills&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guest&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+&amp;#x2F;&amp;#x2F; Count the guests
+guests.reduce(function(sum, guest) {
+  return sum + 1;
+}, 0);
+&amp;#x2F;&amp;#x2F; =&amp;gt; 3
+&amp;#x2F;&amp;#x2F; Get the bills
+guests.map(function(guest) {
+  return bills[guest];
 });
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; =&amp;gt; [22.5, 67, 6]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&amp;#x2F;&amp;#x2F; =&amp;gt; [22.5, 67, 6]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Unfortunately Sally had some bad fish and died after eating at your
 restaurant, so everyone has cancelled their reservations and you are
 now a fast food place. In this case you don&#x27;t have a list of guests,
@@ -107,114 +104,106 @@ but since we are operating over a stream that never ends, the values
 from map&#x2F;reduce themselves become streams that never end.&lt;&#x2F;p&gt;
 &lt;p&gt;Here is some equivalent pseudo code for streams that calculates
 the &lt;code&gt;guestCounts&lt;&#x2F;code&gt; and the &lt;code&gt;guestBills&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guests      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Frank&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Jack&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, ... ]
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;guests      = [... time passes ..., Frank, ... time passes ..., Jack, ... ]
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guestCounts &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,     ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, ... ]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;guestBills &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;=  [... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;5.50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,  ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;time passes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;..., &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;6.50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, ... ]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+guestCounts = [... time passes ..., 1,     ... time passes ..., 2, ... ]
+guestBills =  [... time passes ..., 5.50,  ... time passes ..., 6.50, ... ]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;So a stream is just like an array that never ends, and represents
 snapshots of time.&lt;&#x2F;p&gt;
 &lt;p&gt;Now that we have an intuitive idea what streams are, we can actually
 implement them.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;streams-of-data&quot;&gt;Streams of data&lt;&#x2F;h2&gt;
 &lt;p&gt;A stream of numbers representing a counter would look like:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[0,1,2,3,4,5,6,...]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;[0,1,2,3,4,5,6,...]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;If we wanted to keep track of how long someone was on our page,
 we could just display the latest value of the counter stream
 in our UI and that would be enough.&lt;&#x2F;p&gt;
 &lt;p&gt;A more involved example: Imagine we had a stream of data
 that represents the keys pressed on the keyboard.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&amp;quot;p&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;o&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,...]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;[&amp;quot;p&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;o&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,...]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now we want to have a stream that represents the state of the system,
 say the amount of keys pressed.&lt;&#x2F;p&gt;
 &lt;p&gt;Our key count stream would look like:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&amp;quot;p&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;o&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,...]
+&lt;pre&gt;&lt;code&gt;[&amp;quot;p&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;o&amp;quot;,&amp;quot;w&amp;quot;,&amp;quot;n&amp;quot;,...]
 =&amp;gt;
 [ 1,  2,  3,  4,  5,  6,  7, ...]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This transformation would happen with a reducing function.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keyCountReducer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(reducedValue, streamSnapshot) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This function takes in the stream value, and a reduced value so far, and
 returns a new reduced value. In this case a simple increment.&lt;&#x2F;p&gt;
 &lt;p&gt;We&#x27;ve talked about streams for a while now, let&#x27;s implement them.&lt;&#x2F;p&gt;
 &lt;p&gt;In the following code, we create a function that will return an object with two
 methods: &lt;code&gt;observe&lt;&#x2F;code&gt; for registering event listeners and &lt;code&gt;update&lt;&#x2F;code&gt; for adding a value
 to the stream.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; A function to make streams for us
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamMaker &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;registeredListeners &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [];
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Have an observe function, so
-    &#x2F;&#x2F; people who are interested can
-    &#x2F;&#x2F; get notified when there is an update
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(callback) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;registeredListeners&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;callback&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; A function to make streams for us
+var streamMaker = function() {
+  var registeredListeners = [];
+  return {
+    &amp;#x2F;&amp;#x2F; Have an observe function, so
+    &amp;#x2F;&amp;#x2F; people who are interested can
+    &amp;#x2F;&amp;#x2F; get notified when there is an update
+    observe: function(callback) {
+      registeredListeners.push(callback);
     },
 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Add a value to this stream
-    &#x2F;&#x2F; Once added, will notify all
-    &#x2F;&#x2F; interested parties
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;registeredListeners&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(cb) {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cb&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+    &amp;#x2F;&amp;#x2F; Add a value to this stream
+    &amp;#x2F;&amp;#x2F; Once added, will notify all
+    &amp;#x2F;&amp;#x2F; interested parties
+    update: function(value) {
+      registeredListeners.forEach(function(cb) {
+        cb(value);
       });
     }
   };
 };
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;We also want to make a helper function that will create a new reduced stream
 given an existing &lt;code&gt;stream&lt;&#x2F;code&gt;, a &lt;code&gt;reducingFunction&lt;&#x2F;code&gt;, and an &lt;code&gt;initialReducedValue&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; A function to make a new stream from an existing stream
-&#x2F;&#x2F; a reducing function, and an initial reduced value
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(stream, reducingFunction, initialReducedValue) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamMaker&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;();
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;initialReducedValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; A function to make a new stream from an existing stream
+&amp;#x2F;&amp;#x2F; a reducing function, and an initial reduced value
+var reducedStream = function(stream, reducingFunction, initialReducedValue) {
+  var newStream = streamMaker();
+  var reducedValue = initialReducedValue;
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;stream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(streamSnapshotValue) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducingFunction&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamSnapshotValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+  stream.observe(function(streamSnapshotValue) {
+    reducedValue = reducingFunction(reducedValue, streamSnapshotValue);
+    newStream.update(reducedValue);
   });
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  return newStream;
 };
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now to implement the keypress stream and count stream.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Our reducer from before
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keyCountReducer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(reducedValue, streamSnapshot) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; Our reducer from before
+var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Create the keypress stream
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamMaker&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;();
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; an observer will have that side effect of printing out to the console
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(v) {
-  console.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;key: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;v&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&amp;#x2F;&amp;#x2F; Create the keypress stream
+var keypressStream = streamMaker();
+&amp;#x2F;&amp;#x2F; an observer will have that side effect of printing out to the console
+keypressStream.observe(function(v) {
+  console.log(&amp;quot;key: &amp;quot;, v);
 });
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Whenever we press a key, we&amp;#39;ll update the stream to be the char code.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;onkeypress &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(e) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;String&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fromCharCode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.charCode));
+&amp;#x2F;&amp;#x2F; Whenever we press a key, we&amp;#x27;ll update the stream to be the char code.
+document.onkeypress = function(e) {
+  keypressStream.update(String.fromCharCode(e.charCode));
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Using our reducedStream helper function we can make a new stream
-&#x2F;&#x2F; That reduces the keypresses into a stream of key counts
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keyCountReducer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(v) {
-  console.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;v&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&amp;#x2F;&amp;#x2F; Using our reducedStream helper function we can make a new stream
+&amp;#x2F;&amp;#x2F; That reduces the keypresses into a stream of key counts
+var countStream = reducedStream(keypressStream, keyCountReducer, 0);
+countStream.observe(function(v) {
+  console.log(&amp;quot;Count: &amp;quot;, v);
 });
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now with the new stream we can display it like we did before.&lt;&#x2F;p&gt;
 &lt;p&gt;Which leads us into our next point...&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;rendering-uis-given-data&quot;&gt;Rendering UIs given data&lt;&#x2F;h2&gt;
@@ -223,54 +212,52 @@ let&#x27;s actually show something off.&lt;&#x2F;p&gt;
 &lt;p&gt;This is where React.js shines, but for the purpose of this post we&#x27;ll
 build our own system.&lt;&#x2F;p&gt;
 &lt;p&gt;Let&#x27;s say at one point in time our data looks like:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;}
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;{&amp;quot;Count&amp;quot;:1}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;And we want to render a UI that represents this information.
 So we&#x27;ll write a simple piece of JS that renders html directly from the map.
 To keep it easy, we&#x27;ll use the keys as div ids.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;Pure Function to create the dom nodes
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createDOMNode &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(key, dataMapOrValue) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= document.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;);
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setAttribute&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F;Pure Function to create the dom nodes
+var createDOMNode = function(key, dataMapOrValue) {
+  var div = document.createElement(&amp;quot;div&amp;quot;);
+  div.setAttribute(&amp;quot;id&amp;quot;, key);
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Recurse for children
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(typeof &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dataMapOrValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;=== &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;object&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dataMapOrValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;!== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;Object&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dataMapOrValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(childKey) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;child &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createDOMNode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;childKey&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dataMapOrValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;childKey&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;]);
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appendChild&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;child&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+  &amp;#x2F;&amp;#x2F; Recurse for children
+  if (typeof dataMapOrValue === &amp;quot;object&amp;quot; &amp;amp;&amp;amp; dataMapOrValue !== null) {
+    Object.keys(dataMapOrValue).forEach(function(childKey) {
+      var child = createDOMNode(childKey, dataMapOrValue[childKey]);
+      div.appendChild(child);
     });
-  } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; There are no children just a value.
-    &#x2F;&#x2F; We set the data to be the content of the node
-    &#x2F;&#x2F; Note this does not protect against XSS
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.innerHTML = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dataMapOrValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  } else {
+    &amp;#x2F;&amp;#x2F; There are no children just a value.
+    &amp;#x2F;&amp;#x2F; We set the data to be the content of the node
+    &amp;#x2F;&amp;#x2F; Note this does not protect against XSS
+    div.innerHTML = dataMapOrValue;
   }
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  return div;
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Render Data
+&amp;#x2F;&amp;#x2F; Render Data
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(rootID, appState) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Check if the root id is even defined
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(document.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;getElementById&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rootID&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) === &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; We need to add this root id so we can use it later
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= document.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setAttribute&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rootID&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-    document.body.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appendChild&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+var render = function(rootID, appState) {
+  var root;
+  &amp;#x2F;&amp;#x2F; Check if the root id is even defined
+  if (document.getElementById(rootID) === null) {
+    &amp;#x2F;&amp;#x2F; We need to add this root id so we can use it later
+    root = document.createElement(&amp;quot;div&amp;quot;);
+    root.setAttribute(&amp;quot;id&amp;quot;, rootID);
+    document.body.appendChild(root);
   }
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= document.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;getElementById&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rootID&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Clear all the existing content in the page
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.innerHTML = &amp;quot;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; render the appState back in
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appendChild&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createDOMNode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rootID&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appState&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;));
+  root = document.getElementById(rootID);
+  &amp;#x2F;&amp;#x2F; Clear all the existing content in the page
+  root.innerHTML = &amp;quot;&amp;quot;;
+  &amp;#x2F;&amp;#x2F; render the appState back in
+  root.appendChild(createDOMNode(rootID, appState));
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;counter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, { Count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;});
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+render(&amp;quot;counter&amp;quot;, { Count: 1 });
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;After running this code on a &lt;a href=&quot;about:blank&quot;&gt;blank page&lt;&#x2F;a&gt; we have a page
 that says &lt;code&gt;1&lt;&#x2F;code&gt;, it worked!&lt;&#x2F;p&gt;
 &lt;p&gt;A bit boring though, how about we make it a bit more interesting by updating
@@ -281,18 +268,18 @@ render a page given some data. Now we&#x27;ll tie all the parts together; render
 the stream as it changes over time.&lt;&#x2F;p&gt;
 &lt;p&gt;It really is simple. All we have to do is re-render whenever we receive
 a new value on the stream.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Let&amp;#39;s observe the countstream and render when we get an update
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;counter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; Let&amp;#x27;s observe the countstream and render when we get an update
+countStream.observe(function(value) {
+  render(&amp;quot;counter&amp;quot;, value);
 });
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; And if we wanted to render what the keypress stream tells us, we can do so
-&#x2F;&#x2F; just as easily
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;keypress&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&amp;#x2F;&amp;#x2F; And if we wanted to render what the keypress stream tells us, we can do so
+&amp;#x2F;&amp;#x2F; just as easily
+keypressStream.observe(function(value) {
+  render(&amp;quot;keypress&amp;quot;, value);
 });
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;single-app-state&quot;&gt;Single App State&lt;&#x2F;h2&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;single-app-state&quot;&gt;Single App State&lt;&#x2F;h2&gt;
 &lt;p&gt;A single app state means that there is only one object that encapsulates the
 state of your application.&lt;&#x2F;p&gt;
 &lt;p&gt;Benefits:&lt;&#x2F;p&gt;
@@ -312,37 +299,36 @@ scattered around the application.&lt;&#x2F;p&gt;
 &lt;p&gt;No more.&lt;&#x2F;p&gt;
 &lt;p&gt;A single app state is a natural end to the directed acyclic graph that
 we&#x27;ve created with streams.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;stream1 -&amp;gt; mappedStream
+&lt;pre&gt;&lt;code&gt;stream1 -&amp;gt; mappedStream
                         \
                          mergedStream -&amp;gt; appStateStream
-                        &#x2F;
+                        &amp;#x2F;
 stream2 -&amp;gt; reducedStream
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;implementing-single-app-state&quot;&gt;Implementing Single App State&lt;&#x2F;h2&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;implementing-single-app-state&quot;&gt;Implementing Single App State&lt;&#x2F;h2&gt;
 &lt;p&gt;In our previous example we had two pieces of state,
 the counter and the keypress. We could merge these together into one stream, and
 then form a single app state from that stream.&lt;&#x2F;p&gt;
 &lt;p&gt;First let&#x27;s make a helper function that will merge streams for us. To keep it
 general and simple we&#x27;ll take only two streams and a merging function.
 It will return a new stream which is the merge of both streams with the mergeFn.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; A merge streams helper function
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeStreams &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(streamA, streamB, mergeFn) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamData &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamMaker&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;();
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; A merge streams helper function
+var mergeStreams = function(streamA, streamB, mergeFn) {
+  var streamData = [null, null];
+  var newStream = streamMaker();
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamA&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamData&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;] = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamData&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;));
+  streamA.observe(function(value) {
+    streamData[0] = value;
+    newStream.update(mergeFn.apply(null, streamData));
   });
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamB&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamData&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;] = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamData&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;));
+  streamB.observe(function(value) {
+    streamData[1] = value;
+    newStream.update(mergeFn.apply(null, streamData));
   });
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;newStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+  return newStream;
 };
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This implementation will call the merge function with the latest value from the
 streams or null if the stream hasn&#x27;t emitted anything yet. This means the output
 can return duplicate values of one of the streams.&lt;&#x2F;p&gt;
@@ -350,47 +336,45 @@ can return duplicate values of one of the streams.&lt;&#x2F;p&gt;
 with immutable datastructures)&lt;&#x2F;p&gt;
 &lt;p&gt;We want to put both the keypress and the counter in one object, so our
 merge function will do just that.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeIntoObject &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(keypress, counter) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ counter: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;counter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, keypress: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypress &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;};
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;var mergeIntoObject = function(keypress, counter) {
+  return { counter: counter, keypress: keypress };
 };
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now to create the single app state stream, and render that single app state.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appStateStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeStreams&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeIntoObject&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;var appStateStream = mergeStreams(keypressStream, countStream, mergeIntoObject);
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appStateStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+appStateStream.observe(function(value) {
+  render(&amp;quot;app&amp;quot;, value);
 });
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;final-code&quot;&gt;Final Code&lt;&#x2F;h2&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;final-code&quot;&gt;Final Code&lt;&#x2F;h2&gt;
 &lt;p&gt;Most of these functions are library functions that you wouldn&#x27;t need to implement
 yourself. The final application specific code would look like:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Create the keypress stream
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;streamMaker&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;();
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; Create the keypress stream
+var keypressStream = streamMaker();
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Whenever we press a key, we&amp;#39;ll update the stream to be the char code.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;onkeypress &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(e) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;update&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;String&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fromCharCode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.charCode));
+&amp;#x2F;&amp;#x2F; Whenever we press a key, we&amp;#x27;ll update the stream to be the char code.
+document.onkeypress = function(e) {
+  keypressStream.update(String.fromCharCode(e.charCode));
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keyCountReducer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(reducedValue, streamSnapshot) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+var keyCountReducer = function(reducedValue, streamSnapshot) {
+  return reducedValue + 1;
 };
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Using our reducedStream helper function we can make a new stream
-&#x2F;&#x2F; That reduces the keypresses into a stream of key counts
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;reducedStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keyCountReducer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&amp;#x2F;&amp;#x2F; Using our reducedStream helper function we can make a new stream
+&amp;#x2F;&amp;#x2F; That reduces the keypresses into a stream of key counts
+var countStream = reducedStream(keypressStream, keyCountReducer, 0);
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeIntoObject &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(keypress, counter) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ counter: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;counter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, keypress: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypress &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;};
+var mergeIntoObject = function(keypress, counter) {
+  return { counter: counter, keypress: keypress };
 };
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appStateStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeStreams&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mergeIntoObject&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+var appStateStream = mergeStreams(keypressStream, countStream, mergeIntoObject);
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;appStateStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;observe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(value) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+appStateStream.observe(function(value) {
+  render(&amp;quot;app&amp;quot;, value);
 });
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;You can see a running version of this code &lt;a href=&quot;http:&#x2F;&#x2F;jsfiddle.net&#x2F;Ld3o1Lm5&#x2F;2&#x2F;&quot;&gt;here&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-render-a-closer-look&quot;&gt;The render, a closer look&lt;&#x2F;h2&gt;
 &lt;p&gt;So what does the render actually do?&lt;&#x2F;p&gt;
@@ -429,64 +413,63 @@ however those already exists (e.g. &lt;a href=&quot;http:&#x2F;&#x2F;baconjs.git
 &lt;code&gt;componentWillMount&lt;&#x2F;code&gt; is a function that gets called before the component
 is placed on the DOM.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;&amp;lt;stream&amp;gt;.scan&lt;&#x2F;code&gt; is our reducing function in Bacon.js parlance.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Our streams just like before
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;Bacon&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fromEventTarget&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(document.body, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;keypress&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(e) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;String&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fromCharCode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.charCode);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&amp;#x2F;&amp;#x2F; Our streams just like before
+var keypressStream = Bacon.fromEventTarget(document.body, &amp;quot;keypress&amp;quot;).map(
+  function(e) {
+    return String.fromCharCode(e.charCode);
   }
 );
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;scan&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(count, key) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;count &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+var countStream = keypressStream.scan(0, function(count, key) {
+  return count + 1;
 });
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;KeyPressComponent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;({
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;getInitialState&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, keypress: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;press a key&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, totalWords: &amp;quot;&amp;quot; };
+var KeyPressComponent = React.createClass({
+  getInitialState: function() {
+    return { count: 0, keypress: &amp;quot;&amp;lt;press a key&amp;gt;&amp;quot;, totalWords: &amp;quot;&amp;quot; };
   },
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;componentWillMount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.props.countStream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;onValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(count) {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setState&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;({ count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;count &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;});
-      }.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bind&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+  componentWillMount: function() {
+    this.props.countStream.onValue(
+      function(count) {
+        this.setState({ count: count });
+      }.bind(this)
     );
 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.props.keypressStream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;onValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(key) {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setState&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;({ keypress: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;});
-      }.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bind&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+    this.props.keypressStream.onValue(
+      function(key) {
+        this.setState({ keypress: key });
+      }.bind(this)
     );
 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Add something extra because why not
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.props.keypressStream
-      .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;scan&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(totalWords, key) {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;totalWords &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+    &amp;#x2F;&amp;#x2F; Add something extra because why not
+    this.props.keypressStream
+      .scan(&amp;quot;&amp;quot;, function(totalWords, key) {
+        return totalWords + key;
       })
-      .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;onValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(totalWords) {
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;setState&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;({ totalWords: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;totalWords &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;});
-        }.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bind&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+      .onValue(
+        function(totalWords) {
+          this.setState({ totalWords: totalWords });
+        }.bind(this)
       );
   },
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.DOM.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;h1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.state.count),
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;h1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Keypress: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.state.keypress),
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;h1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Total words: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.state.totalWords)
+  render: function() {
+    return React.DOM.div(
+      null,
+      React.createElement(&amp;quot;h1&amp;quot;, null, &amp;quot;Count: &amp;quot; + this.state.count),
+      React.createElement(&amp;quot;h1&amp;quot;, null, &amp;quot;Keypress: &amp;quot; + this.state.keypress),
+      React.createElement(&amp;quot;h1&amp;quot;, null, &amp;quot;Total words: &amp;quot; + this.state.totalWords)
     );
   }
 });
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;render&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ebcb8b;&quot;&gt;React&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;KeyPressComponent&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;, {
-    keypressStream: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keypressStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
-    countStream: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;countStream
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;}),
+React.render(
+  React.createElement(KeyPressComponent, {
+    keypressStream: keypressStream,
+    countStream: countStream
+  }),
   document.body
 );
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;jsfiddle for this code &lt;a href=&quot;http:&#x2F;&#x2F;jsfiddle.net&#x2F;jf2j62wj&#x2F;10&#x2F;&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;closing-notes&quot;&gt;Closing Notes&lt;&#x2F;h2&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;facebook.github.io&#x2F;react&#x2F;&quot;&gt;React&lt;&#x2F;a&gt; is great for reactively rendering the ui.

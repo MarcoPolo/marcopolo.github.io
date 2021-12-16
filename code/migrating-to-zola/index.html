@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -73,22 +73,20 @@ set and make those features a <em>joy</em> to use.</p>
 <p>The biggest change was converting Jekyll's front-matter (the stuff at the top
 of the md files) format into Zola's front-matter format. Which was changing
 this:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">---
+<pre><code>---
 layout: post
 title: Interacting with Go from React Native through JSI
 categories: javascript react-native jsi go
 ---
 
-</span></code></pre>
+</code></pre>
 <p>into this:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">+++
+<pre><code>+++
 title = &quot;Interacting with Go from React Native through JSI&quot;
 [taxonomies]
 tags = [&quot;javascript&quot;, &quot;react-native&quot;, &quot;JSI&quot;, &quot;Go&quot;]
 +++
-</span></code></pre>
+</code></pre>
 <p>There was also a slight rewrite in the template files that was necessary
 since Zola uses the <a href="https://tera.netlify.com">Tera Templating Engine</a></p>
 <p>The rest was just moving (I'd argue organizing) files around.</p>

@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -76,33 +76,31 @@ to a separate worker.js file. I solved it by using the same exact file for both
 the main page (browser context) and the web worker. That, however, came with one
 problem; you have to explicitly declare code that should run on the webworker
 and code that runs in the browser. Like so:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">ns</span><span style="color:#c0c5ce;"> servant.demo
-  (</span><span style="color:#d08770;">:require </span><span style="color:#c0c5ce;">[servant.core </span><span style="color:#d08770;">:as</span><span style="color:#c0c5ce;"> servant]
-            [servant.worker </span><span style="color:#d08770;">:as</span><span style="color:#c0c5ce;"> worker]))
+<pre data-lang="clojure" class="language-clojure "><code class="language-clojure" data-lang="clojure">(ns servant.demo
+  (:require [servant.core :as servant]
+            [servant.worker :as worker]))
 
-(</span><span style="color:#b48ead;">defn </span><span style="color:#8fa1b3;">window-load </span><span style="color:#c0c5ce;">[] (</span><span style="color:#bf616a;">.log</span><span style="color:#c0c5ce;"> js/console &quot;</span><span style="color:#a3be8c;">this runs in the browser</span><span style="color:#c0c5ce;">&quot;))
+(defn window-load [] (.log js&#x2F;console &quot;this runs in the browser&quot;))
 
-(</span><span style="color:#bf616a;">if </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">servant/webworker?</span><span style="color:#c0c5ce;">)
-    (</span><span style="color:#bf616a;">worker/bootstrap</span><span style="color:#c0c5ce;">) </span><span style="color:#65737e;">;;Sets the worker up to receive messages
-    (set! (.-onload js/window) window-load))
-</span></code></pre>
+(if (servant&#x2F;webworker?)
+    (worker&#x2F;bootstrap) ;;Sets the worker up to receive messages
+    (set! (.-onload js&#x2F;window) window-load))
+</code></pre>
 <p>As part of that caveat, the webworker can only see code that it can get to.
 Anything defined in window-load would not be visible to the webworker. Now let's
 take a look at how we can define a servant function, using the <code>defservantfn</code>
 macro.</p>
 <p>We need to use a special function, <code>defservantfn</code> to define functions that will
 serve as our &quot;access points&quot; to the web worker.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">ns</span><span style="color:#c0c5ce;"> servant.demo
-  (</span><span style="color:#d08770;">:require-macros </span><span style="color:#c0c5ce;">[servant.macros </span><span style="color:#d08770;">:refer </span><span style="color:#c0c5ce;">[defservantfn]]))
+<pre data-lang="clojure" class="language-clojure "><code class="language-clojure" data-lang="clojure">(ns servant.demo
+  (:require-macros [servant.macros :refer [defservantfn]]))
 
-(</span><span style="color:#b48ead;">defn </span><span style="color:#8fa1b3;">make-it-funny </span><span style="color:#c0c5ce;">[not-funny]
-  (</span><span style="color:#bf616a;">str </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">Hahahah:</span><span style="color:#c0c5ce;">&quot; not-funny))
+(defn make-it-funny [not-funny]
+  (str &quot;Hahahah:&quot; not-funny))
 
-(</span><span style="color:#b48ead;">defservantfn </span><span style="color:#8fa1b3;">servant-with-humor </span><span style="color:#c0c5ce;">[your-joke]
-    (</span><span style="color:#bf616a;">make-it-funny</span><span style="color:#c0c5ce;"> your-joke))
-</span></code></pre>
+(defservantfn servant-with-humor [your-joke]
+    (make-it-funny your-joke))
+</code></pre>
 <p>The <code>defservantfn</code> macro simply calls a defn with the
 same arguments, and registers that function with a hashmap atom for the
 webworker. The key is the hash of the function and the value is the function
@@ -132,25 +130,23 @@ you can't even afford copying data to the webworker (especially if the data is
 big, like at <a href="http://cryptic.io">Cryptic.io</a>). Servant provides a way to access
 webworkers' nifty <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/Performance/Using_web_workers#Passing_data_by_transferring_ownership_(transferable_objects)">arraybuffer transfer context ability</a>.
 Take for example:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">defservantfn </span><span style="color:#8fa1b3;">get-first-4bytes-as-str </span><span style="color:#c0c5ce;">[arraybuffer]
-  (</span><span style="color:#bf616a;">let </span><span style="color:#c0c5ce;">[d (</span><span style="color:#bf616a;">js/DataView.</span><span style="color:#c0c5ce;"> arraybuffer)]
-      (</span><span style="color:#bf616a;">.toString </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">.getUint32</span><span style="color:#c0c5ce;"> d </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">) </span><span style="color:#d08770;">16</span><span style="color:#c0c5ce;">)))
-</span></code></pre>
+<pre data-lang="clojure" class="language-clojure "><code class="language-clojure" data-lang="clojure">(defservantfn get-first-4bytes-as-str [arraybuffer]
+  (let [d (js&#x2F;DataView. arraybuffer)]
+      (.toString (.getUint32 d 0) 16)))
+</code></pre>
 <p>That function expects an arraybuffer and returns a string. If we wanted to be
 efficient about it (and didn't care about getting rid of the arraybuffer) we can
 make the call using the <code>servant/array-buffer-message-standard-reply</code> fn instead
 of the <code>servant/standard-message</code>. So the efficient result would be:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">arraybuffer </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">js/ArrayBuffer. </span><span style="color:#d08770;">10</span><span style="color:#c0c5ce;">))
-(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">d </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">js/DataView.</span><span style="color:#c0c5ce;"> arraybuffer))
-(</span><span style="color:#bf616a;">.setUint32</span><span style="color:#c0c5ce;"> d </span><span style="color:#d08770;">0 0xdeadbeef</span><span style="color:#c0c5ce;">)
-(</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">result-channel
-  </span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">servant/servant-thread</span><span style="color:#c0c5ce;">
+<pre data-lang="clojure" class="language-clojure "><code class="language-clojure" data-lang="clojure">(def arraybuffer (js&#x2F;ArrayBuffer. 10))
+(def d (js&#x2F;DataView. arraybuffer))
+(.setUint32 d 0 0xdeadbeef)
+(def result-channel
+  (servant&#x2F;servant-thread
     servant-channel
-    servant/array-buffer-message-standard-reply
+    servant&#x2F;array-buffer-message-standard-reply
     get-first-4bytes-as-str arraybuffer [arraybuffer]))
-</span></code></pre>
+</code></pre>
 <p>The arguments to servant-thread are:</p>
 <ul>
 <li><code>servant-channel</code> - channel that contains the available workers</li>

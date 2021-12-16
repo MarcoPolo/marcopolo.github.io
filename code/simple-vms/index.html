@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -72,11 +72,10 @@ option of whether you want state to be persisted, and defines a Systemd
 service for the vm (There can be multiple VMs). This really is a simple
 module, the NixOS service definition is about 10 lines long, and its
 <code>ExecStart</code> is simply:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">mkdir -p /var/lib/simple-vms/${name}
-cd /var/lib/simple-vms/${name}
-exec ${cfg.vm.out}/bin/run-nixos-vm;
-</span></code></pre>
+<pre><code>mkdir -p &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+cd &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
+exec ${cfg.vm.out}&#x2F;bin&#x2F;run-nixos-vm;
+</code></pre>
 <p>With this service we can get and keep our VMs up and running.</p>
 <h2 id="stateless-vms">Stateless VMs</h2>
 <p>I got a sticker recently that said &quot;You either have one source of truth, of

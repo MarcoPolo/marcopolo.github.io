@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -66,17 +66,16 @@ depending on the world being in a certain state. Instead, <em>A</em>
 what a piece of software needs to build and run. Here's an example of the
 definition on how to build the <a href="https://www.gnu.org/software/hello/">GNU
 Hello</a> program:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">with </span><span style="color:#c0c5ce;">(</span><span style="color:#96b5b4;">import </span><span style="color:#a3be8c;">&lt;nixpkgs&gt; </span><span style="color:#c0c5ce;">{});
-</span><span style="color:#96b5b4;">derivation </span><span style="color:#c0c5ce;">{
-  </span><span style="color:#d08770;">name </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">hello</span><span style="color:#c0c5ce;">&quot;;
-  </span><span style="color:#d08770;">builder </span><span style="color:#c0c5ce;">= &quot;</span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">bash</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/bash</span><span style="color:#c0c5ce;">&quot;;
-  </span><span style="color:#d08770;">args </span><span style="color:#c0c5ce;">= [ </span><span style="color:#a3be8c;">./builder.sh </span><span style="color:#c0c5ce;">];
-  </span><span style="color:#d08770;">buildInputs </span><span style="color:#c0c5ce;">= [ </span><span style="color:#bf616a;">gnutar gzip gnumake gcc binutils-unwrapped coreutils gawk gnused gnugrep </span><span style="color:#c0c5ce;">];
-  </span><span style="color:#d08770;">src </span><span style="color:#c0c5ce;">= </span><span style="color:#a3be8c;">./hello-2.10.tar.gz</span><span style="color:#c0c5ce;">;
-  </span><span style="color:#d08770;">system </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">builtins</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">currentSystem</span><span style="color:#c0c5ce;">;
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">with (import &lt;nixpkgs&gt; {});
+derivation {
+  name = &quot;hello&quot;;
+  builder = &quot;${bash}&#x2F;bin&#x2F;bash&quot;;
+  args = [ .&#x2F;builder.sh ];
+  buildInputs = [ gnutar gzip gnumake gcc binutils-unwrapped coreutils gawk gnused gnugrep ];
+  src = .&#x2F;hello-2.10.tar.gz;
+  system = builtins.currentSystem;
 }
-</span></code></pre>
+</code></pre>
 <p>It's not necessary to explain this <a href="https://nixos.org/guides/nix-pills/generic-builders.html#idm140737320275008">code in
 detail</a>.
 It's enough to point out that <code>buildInputs</code> defines what the environment should
@@ -94,56 +93,54 @@ same exact shared library <em>B</em>.</p>
 fundamental change in how Nix Flakes works, will work forever<sup class="footnote-reference"><a href="#1">1</a></sup> on an x86_64
 linux machine.</p>
 <p>The definition of our program, <code>flake.nix</code></p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#8fa1b3;">{
-  </span><span style="color:#c0c5ce;">inputs</span><span style="background-color:#bf616a;color:#2b303b;">.</span><span style="color:#bf616a;">nixpkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">url </span><span style="background-color:#bf616a;color:#2b303b;">=</span><span style="color:#c0c5ce;"> &quot;</span><span style="color:#a3be8c;">github:NixOS/nixpkgs/nixos-20.09</span><span style="color:#c0c5ce;">&quot;</span><span style="background-color:#bf616a;color:#2b303b;">;</span><span style="color:#c0c5ce;">
-  </span><span style="color:#bf616a;">outputs </span><span style="background-color:#bf616a;color:#2b303b;">=</span><span style="color:#c0c5ce;">
-    </span><span style="color:#8fa1b3;">{ </span><span style="color:#c0c5ce;">self, nixpkgs </span><span style="color:#8fa1b3;">}</span><span style="color:#c0c5ce;">:
-    </span><span style="color:#b48ead;">let
-      </span><span style="color:#d08770;">pkgs </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">nixpkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">legacyPackages</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">x86_64-linux</span><span style="color:#c0c5ce;">;
-    </span><span style="color:#b48ead;">in
-    </span><span style="color:#c0c5ce;">{
-      </span><span style="color:#d08770;">defaultPackage</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">x86_64-linux </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">pkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">writeScriptBin </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">hello-smalltalk</span><span style="color:#c0c5ce;">&quot; &#39;&#39;
-        </span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">pkgs</span><span style="font-style:italic;color:#c0c5ce;">.</span><span style="font-style:italic;color:#bf616a;">gnu-smalltalk</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/gst &lt;&lt;&lt; &quot;Transcript show: &#39;Hello World!&#39;.&quot;
-      </span><span style="color:#c0c5ce;">&#39;&#39;;
-    }</span><span style="background-color:#bf616a;color:#2b303b;">;</span><span style="color:#c0c5ce;">
-</span><span style="color:#8fa1b3;">}
-</span></code></pre>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{
+  inputs.nixpkgs.url = &quot;github:NixOS&#x2F;nixpkgs&#x2F;nixos-20.09&quot;;
+  outputs =
+    { self, nixpkgs }:
+    let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    in
+    {
+      defaultPackage.x86_64-linux = pkgs.writeScriptBin &quot;hello-smalltalk&quot; &#x27;&#x27;
+        ${pkgs.gnu-smalltalk}&#x2F;bin&#x2F;gst &lt;&lt;&lt; &quot;Transcript show: &#x27;Hello World!&#x27;.&quot;
+      &#x27;&#x27;;
+    };
+}
+</code></pre>
 <p>The pinned version of all our dependencies, <code>flake.lock</code></p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">{
-  &quot;</span><span style="color:#a3be8c;">nodes</span><span style="color:#c0c5ce;">&quot;: {
-    &quot;</span><span style="color:#a3be8c;">nixpkgs</span><span style="color:#c0c5ce;">&quot;: {
-      &quot;</span><span style="color:#a3be8c;">locked</span><span style="color:#c0c5ce;">&quot;: {
-        &quot;</span><span style="color:#a3be8c;">lastModified</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">1606669556</span><span style="color:#c0c5ce;">,
-        &quot;</span><span style="color:#a3be8c;">narHash</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">sha256-9rlqZ5JwnA6nK04vKhV0s5ndepnWL5hpkaTV1b4ASvk=</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">owner</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">NixOS</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">repo</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">nixpkgs</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">rev</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">ae47c79479a086e96e2977c61e538881913c0c08</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">type</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">github</span><span style="color:#c0c5ce;">&quot;
+<pre data-lang="json" class="language-json "><code class="language-json" data-lang="json">{
+  &quot;nodes&quot;: {
+    &quot;nixpkgs&quot;: {
+      &quot;locked&quot;: {
+        &quot;lastModified&quot;: 1606669556,
+        &quot;narHash&quot;: &quot;sha256-9rlqZ5JwnA6nK04vKhV0s5ndepnWL5hpkaTV1b4ASvk=&quot;,
+        &quot;owner&quot;: &quot;NixOS&quot;,
+        &quot;repo&quot;: &quot;nixpkgs&quot;,
+        &quot;rev&quot;: &quot;ae47c79479a086e96e2977c61e538881913c0c08&quot;,
+        &quot;type&quot;: &quot;github&quot;
       },
-      &quot;</span><span style="color:#a3be8c;">original</span><span style="color:#c0c5ce;">&quot;: {
-        &quot;</span><span style="color:#a3be8c;">owner</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">NixOS</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">ref</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">nixos-20.09</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">repo</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">nixpkgs</span><span style="color:#c0c5ce;">&quot;,
-        &quot;</span><span style="color:#a3be8c;">type</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">github</span><span style="color:#c0c5ce;">&quot;
+      &quot;original&quot;: {
+        &quot;owner&quot;: &quot;NixOS&quot;,
+        &quot;ref&quot;: &quot;nixos-20.09&quot;,
+        &quot;repo&quot;: &quot;nixpkgs&quot;,
+        &quot;type&quot;: &quot;github&quot;
       }
     },
-    &quot;</span><span style="color:#a3be8c;">root</span><span style="color:#c0c5ce;">&quot;: {
-      &quot;</span><span style="color:#a3be8c;">inputs</span><span style="color:#c0c5ce;">&quot;: {
-        &quot;</span><span style="color:#a3be8c;">nixpkgs</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">nixpkgs</span><span style="color:#c0c5ce;">&quot;
+    &quot;root&quot;: {
+      &quot;inputs&quot;: {
+        &quot;nixpkgs&quot;: &quot;nixpkgs&quot;
       }
     }
   },
-  &quot;</span><span style="color:#a3be8c;">root</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">root</span><span style="color:#c0c5ce;">&quot;,
-  &quot;</span><span style="color:#a3be8c;">version</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">7
-</span><span style="color:#c0c5ce;">}
-</span></code></pre>
+  &quot;root&quot;: &quot;root&quot;,
+  &quot;version&quot;: 7
+}
+</code></pre>
 <p>copy those files into a directory and run it:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#bf616a;">❯</span><span style="color:#c0c5ce;"> nix run
-</span><span style="color:#bf616a;">Hello</span><span style="color:#c0c5ce;"> World!
-</span></code></pre><h2 id="solid-foundations">Solid Foundations</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">❯ nix run
+Hello World!
+</code></pre>
+<h2 id="solid-foundations">Solid Foundations</h2>
 <p>With Nix, we can make steady forward progress. Without fear that our foundations
 will collapse under us like sand castles. Once we've built something in Nix we
 can be pretty sure it will work for our colleague or ourselves in 10 years. Nix

@@ -45,11 +45,10 @@ option of whether you want state to be persisted, and defines a Systemd
 service for the vm (There can be multiple VMs). This really is a simple
 module, the NixOS service definition is about 10 lines long, and its
 &lt;code&gt;ExecStart&lt;&#x2F;code&gt; is simply:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir -p &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
-cd &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
-exec ${cfg.vm.out}&#x2F;bin&#x2F;run-nixos-vm;
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;mkdir -p &amp;#x2F;var&amp;#x2F;lib&amp;#x2F;simple-vms&amp;#x2F;${name}
+cd &amp;#x2F;var&amp;#x2F;lib&amp;#x2F;simple-vms&amp;#x2F;${name}
+exec ${cfg.vm.out}&amp;#x2F;bin&amp;#x2F;run-nixos-vm;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;With this service we can get and keep our VMs up and running.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;stateless-vms&quot;&gt;Stateless VMs&lt;&#x2F;h2&gt;
 &lt;p&gt;I got a sticker recently that said &amp;quot;You either have one source of truth, of

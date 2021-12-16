@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -55,12 +55,11 @@
 <p>In the above context, it's an implementation detail. I'm not saying it's the wrong or right trade off, I'm only saying that the reason you have to reach for <code>useMemo</code> when passing around closures is because of how React is implemented. So the quote is accurate.</p>
 <p>Is that a bad thing? That's where it gets more subjective. I think it is, because these types of things happen very often and, in a big app, you quickly succumb to death by a thousand cuts (one closure causing a component to re-render isn't a big deal, but when you have hundreds of components with various closures it gets hairy).</p>
 <p>The next example OP posts is about setting users in a list.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#bf616a;">setUsers</span><span style="color:#c0c5ce;">([
-  ...</span><span style="color:#bf616a;">users</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">filter</span><span style="color:#c0c5ce;">(user </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">user</span><span style="color:#c0c5ce;">.name !== &quot;</span><span style="color:#a3be8c;">Sebastian</span><span style="color:#c0c5ce;">&quot;),
-  { name: &quot;</span><span style="color:#a3be8c;">Sebastian</span><span style="color:#c0c5ce;">&quot; }
+<pre data-lang="js" class="language-js "><code class="language-js" data-lang="js">setUsers([
+  ...users.filter(user =&gt; user.name !== &quot;Sebastian&quot;),
+  { name: &quot;Sebastian&quot; }
 ]);
-</span></code></pre>
+</code></pre>
 <p>If you are happy with that syntax, and the tradeoff of having to use <code>key</code> props whenever you display lists, and relying on React's heuristics to efficiently update the views corresponding to the list, then React is fine. If, however, you are okay with a different syntax you may be interested in another idea I've seen. The basic idea is you keep track of the diffs themselves instead of the old version vs. the new version. Knowing the diffs directly let you know exactly how to update the views directly so you don't have to rely on the <code>key</code> prop, heuristics, and you can efficiently/quickly update the View list. This is similar to how <a href="https://github.com/immerjs/immer">Immer</a> works. <a href="https://docs.rs/futures-signals/0.3.8/futures_signals/tutorial/index.html">Futures Signals</a> also does this to efficiently send updates of a list to consumers (look at <code>SignalVec</code>).</p>
 <h2 id="stale-closures-in-hooks-are-confusing">&quot;Stale closures in Hooks are confusing&quot;</h2>
 <p>I agree with OP's points here. It's important to know where your data is coming from. In the old hook-less style of React, your data was what you got from your props/state and nothing else. With hooks, it's easier to work with stale data that comes in from outside your props. It's a learning curve, but not necessarily bad.</p>

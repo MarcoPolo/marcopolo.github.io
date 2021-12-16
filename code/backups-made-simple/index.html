@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -69,11 +69,10 @@ is as easy as doing <code>zfs snapshot tank/home/marco@friday</code>.</p>
 <h3 id="automatic-snapshots">Automatic snapshots</h3>
 <p>On NixOS setting up automatic snapshots is a breeze, just add the following to
 your NixOS Configuration:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">{
-  </span><span style="color:#d08770;">services</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">zfs</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">autoSnapshot</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">enable </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">true</span><span style="color:#c0c5ce;">;
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{
+  services.zfs.autoSnapshot.enable = true;
 }
-</span></code></pre>
+</code></pre>
 <p>and setting the <code>com.sun:auto-snapshot</code> option on the filesystem. E.g.: <code>zfs set com.sun:auto-snapshot=true &lt;pool&gt;/&lt;fs&gt;</code>. Note that this can also be done on
 creation of the filesystem: <code>zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true tank/home</code>.</p>
 <p>With that enabled, ZFS will keep a snapshot for the latest 4 15-minute, 24
@@ -97,9 +96,8 @@ available. With <code>lazyssh</code> we can make <code>host2</code> only exist w
 command finishes. The command with <code>lazyssh</code> would look something like this
 (assuming you have a <code>lazyssh</code> target in your <code>.ssh/config</code> as explained in the
 <a href="https://github.com/stephank/lazyssh">docs</a>):</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">host1# zfs send tank/dana@snap1 | ssh -J lazyssh host2 zfs recv newtank/dana
-</span></code></pre>
+<pre><code>host1# zfs send tank&#x2F;dana@snap1 | ssh -J lazyssh host2 zfs recv newtank&#x2F;dana
+</code></pre>
 <p>Note the only difference is the <code>-J lazyssh</code>.</p>
 <p>So how do we actually setup <code>lazyssh</code> to do this? Here is my configuration:</p>
 <div >
@@ -119,44 +117,42 @@ config and known_hosts file so these are automatically correct and properly
 setup. I generate the lines for known_hosts when I generate the host keys
 that go in the <code>user_data</code> field in the <code>lazsyssh-config.hcl</code> above. Here's the
 relevant section from my homemanager config:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">{
-  </span><span style="color:#d08770;">programs</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">ssh </span><span style="color:#c0c5ce;">= {
-    </span><span style="color:#d08770;">enable </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">true</span><span style="color:#c0c5ce;">;
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{
+  programs.ssh = {
+    enable = true;
 
-    </span><span style="color:#65737e;"># I keep this file tracked in Git alongside my NixOS configs.
-    </span><span style="color:#d08770;">userKnownHostsFile </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">/path/to/known_hosts</span><span style="color:#c0c5ce;">&quot;;
-    </span><span style="color:#d08770;">matchBlocks </span><span style="color:#c0c5ce;">= {
-      &quot;</span><span style="color:#a3be8c;">archiver</span><span style="color:#c0c5ce;">&quot; = {
-        </span><span style="color:#d08770;">user </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">root</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">hostname </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">archiver</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">proxyJump </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">lazyssh</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">identityFile </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">PATH_TO_AWS_KEYPAIR</span><span style="color:#c0c5ce;">&quot;;
+    # I keep this file tracked in Git alongside my NixOS configs.
+    userKnownHostsFile = &quot;&#x2F;path&#x2F;to&#x2F;known_hosts&quot;;
+    matchBlocks = {
+      &quot;archiver&quot; = {
+        user = &quot;root&quot;;
+        hostname = &quot;archiver&quot;;
+        proxyJump = &quot;lazyssh&quot;;
+        identityFile = &quot;PATH_TO_AWS_KEYPAIR&quot;;
       };
 
-      &quot;</span><span style="color:#a3be8c;">lazyssh</span><span style="color:#c0c5ce;">&quot; = {
-        </span><span style="color:#65737e;"># This assume you are running lazyssh locally, but it can also
+      &quot;lazyssh&quot; = {
+        # This assume you are running lazyssh locally, but it can also
         # reference another machine.
-        </span><span style="color:#d08770;">hostname </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">localhost</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">port </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">7922</span><span style="color:#c0c5ce;">;
-        </span><span style="color:#d08770;">user </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">jump</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">identityFile </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">PATH_TO_LAZYSSH_CLIENT_KEY</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#d08770;">identitiesOnly </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">true</span><span style="color:#c0c5ce;">;
-        </span><span style="color:#d08770;">extraOptions </span><span style="color:#c0c5ce;">= {
-          &quot;</span><span style="color:#a3be8c;">PreferredAuthentications</span><span style="color:#c0c5ce;">&quot; = &quot;</span><span style="color:#a3be8c;">publickey</span><span style="color:#c0c5ce;">&quot;;
+        hostname = &quot;localhost&quot;;
+        port = 7922;
+        user = &quot;jump&quot;;
+        identityFile = &quot;PATH_TO_LAZYSSH_CLIENT_KEY&quot;;
+        identitiesOnly = true;
+        extraOptions = {
+          &quot;PreferredAuthentications&quot; = &quot;publickey&quot;;
         };
       };
     };
   };
 }
-</span></code></pre>
+</code></pre>
 <p>Finally, I use the provided NixOS Module for <code>lazyssh</code> to manage starting it and
 keeping it up. Here's the relevant parts from my <code>flake.nix</code>:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">{
+<pre><code>{
   # My fork that supports placements and terminating instances after failing to
   # attach volume.
-  inputs.lazyssh.url = &quot;github:marcopolo/lazyssh/attach-volumes&quot;;
+  inputs.lazyssh.url = &quot;github:marcopolo&#x2F;lazyssh&#x2F;attach-volumes&quot;;
   inputs.lazyssh.inputs.nixpkgs.follows = &quot;nixpkgs&quot;;
 
     outputs =
@@ -172,10 +168,10 @@ keeping it up. Here's the relevant parts from my <code>flake.nix</code>:</p>
               {
                 imports = [lazyssh.nixosModule]
                 services.lazyssh.configFile =
-                  &quot;/path/to/lazyssh-config.hcl&quot;;
-                # You&#39;ll need to add the correct AWS credentials to `/home/lazyssh/.aws`
+                  &quot;&#x2F;path&#x2F;to&#x2F;lazyssh-config.hcl&quot;;
+                # You&#x27;ll need to add the correct AWS credentials to `&#x2F;home&#x2F;lazyssh&#x2F;.aws`
                 # This could probably be a symlink with home-manager to a
-                # managed file somewhere else, but I haven&#39;t go down that path
+                # managed file somewhere else, but I haven&#x27;t go down that path
                 # yet
                 users.users.lazyssh = {
                   isNormalUser = true;
@@ -187,7 +183,7 @@ keeping it up. Here's the relevant parts from my <code>flake.nix</code>:</p>
       };
     }
 }
-</span></code></pre>
+</code></pre>
 <p>With all that setup, I can ssh into the archiver by simple running <code>ssh archiver</code>. Under the hood, <code>lazyssh</code> starts the EC2 instance and attaches the
 EBS drive to it. And since <code>ssh archiver</code> works, so does the original example
 of: <code>zfs send tank/dana@snap1 | ssh archiver zfs recv newtank/dana</code>.</p>
@@ -210,43 +206,42 @@ a while to warm-up the instance.</li>
 </ol>
 <p>Thankfully with flakes, using my own fork was painless. Here's the relevant
 section from my <code>flake.nix</code> file:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">  </span><span style="color:#65737e;"># inputs.zfs-replicate.url = &quot;github:marcopolo/zfs-replicate/flake&quot;;
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">  # inputs.zfs-replicate.url = &quot;github:marcopolo&#x2F;zfs-replicate&#x2F;flake&quot;;
   # ...
   # Inside nixosSystem modules...
-  </span><span style="color:#c0c5ce;">(</span><span style="color:#8fa1b3;">{ </span><span style="color:#c0c5ce;">pkgs, ... </span><span style="color:#8fa1b3;">}</span><span style="color:#c0c5ce;">:
+  ({ pkgs, ... }:
     {
-      </span><span style="color:#d08770;">imports </span><span style="color:#c0c5ce;">= [ </span><span style="color:#bf616a;">zfs-replicate</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">nixosModule </span><span style="color:#c0c5ce;">];
-      </span><span style="color:#65737e;"># Disable the existing module
-      </span><span style="color:#d08770;">disabledModules </span><span style="color:#c0c5ce;">= [ &quot;</span><span style="color:#a3be8c;">services/backup/zfs-replication.nix</span><span style="color:#c0c5ce;">&quot; ];
+      imports = [ zfs-replicate.nixosModule ];
+      # Disable the existing module
+      disabledModules = [ &quot;services&#x2F;backup&#x2F;zfs-replication.nix&quot; ];
 
-      </span><span style="color:#d08770;">services</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">zfs</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">autoReplication </span><span style="color:#c0c5ce;">=
-        </span><span style="color:#b48ead;">let
-          </span><span style="color:#d08770;">host </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">archiver</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#d08770;">sshPath </span><span style="color:#c0c5ce;">= &quot;</span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">pkgs</span><span style="font-style:italic;color:#c0c5ce;">.</span><span style="font-style:italic;color:#bf616a;">openssh</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/ssh</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#65737e;"># Make sure the machine is up-to-date
-          </span><span style="color:#d08770;">execStartPre </span><span style="color:#c0c5ce;">= &quot;</span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">sshPath</span><span style="font-style:italic;color:#ab7967;">} ${</span><span style="font-style:italic;color:#bf616a;">host</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;"> nixos-rebuild switch</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#d08770;">honeycombAPIKey </span><span style="color:#c0c5ce;">= (</span><span style="color:#96b5b4;">import </span><span style="color:#a3be8c;">./secrets.nix</span><span style="color:#c0c5ce;">).</span><span style="color:#bf616a;">honeycomb_api_key</span><span style="color:#c0c5ce;">;
-          </span><span style="color:#d08770;">honeycombCommand </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">pkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">writeScriptBin </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">reportResult</span><span style="color:#c0c5ce;">&quot; &#39;&#39;</span><span style="color:#a3be8c;">
-            #!/usr/bin/env </span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">pkgs</span><span style="font-style:italic;color:#c0c5ce;">.</span><span style="font-style:italic;color:#bf616a;">bash</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/bash
-            </span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">pkgs</span><span style="font-style:italic;color:#c0c5ce;">.</span><span style="font-style:italic;color:#bf616a;">curl</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/curl https://api.honeycomb.io/1/events/zfs-replication -X POST \
-              -H &quot;X-Honeycomb-Team: </span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">honeycombAPIKey</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">&quot; \
-              -H &quot;X-Honeycomb-Event-Time: $(</span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">pkgs</span><span style="font-style:italic;color:#c0c5ce;">.</span><span style="font-style:italic;color:#bf616a;">coreutils</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/date -u +&quot;%Y-%m-%dT%H:%M:%SZ&quot;)&quot; \
+      services.zfs.autoReplication =
+        let
+          host = &quot;archiver&quot;;
+          sshPath = &quot;${pkgs.openssh}&#x2F;bin&#x2F;ssh&quot;;
+          # Make sure the machine is up-to-date
+          execStartPre = &quot;${sshPath} ${host} nixos-rebuild switch&quot;;
+          honeycombAPIKey = (import .&#x2F;secrets.nix).honeycomb_api_key;
+          honeycombCommand = pkgs.writeScriptBin &quot;reportResult&quot; &#x27;&#x27;
+            #!&#x2F;usr&#x2F;bin&#x2F;env ${pkgs.bash}&#x2F;bin&#x2F;bash
+            ${pkgs.curl}&#x2F;bin&#x2F;curl https:&#x2F;&#x2F;api.honeycomb.io&#x2F;1&#x2F;events&#x2F;zfs-replication -X POST \
+              -H &quot;X-Honeycomb-Team: ${honeycombAPIKey}&quot; \
+              -H &quot;X-Honeycomb-Event-Time: $(${pkgs.coreutils}&#x2F;bin&#x2F;date -u +&quot;%Y-%m-%dT%H:%M:%SZ&quot;)&quot; \
               -d &quot;{\&quot;serviceResult\&quot;:\&quot;$SERVICE_RESULT\&quot;, \&quot;exitCode\&quot;: \&quot;$EXIT_CODE\&quot;, \&quot;exitStatus\&quot;: \&quot;$EXIT_STATUS\&quot;}&quot;
-          </span><span style="color:#c0c5ce;">&#39;&#39;;
-          </span><span style="color:#d08770;">execStopPost </span><span style="color:#c0c5ce;">= &quot;</span><span style="font-style:italic;color:#ab7967;">${</span><span style="font-style:italic;color:#bf616a;">honeycombCommand</span><span style="font-style:italic;color:#ab7967;">}</span><span style="color:#a3be8c;">/bin/reportResult</span><span style="color:#c0c5ce;">&quot;;
-        </span><span style="color:#b48ead;">in
-        </span><span style="color:#c0c5ce;">{
-          </span><span style="color:#b48ead;">inherit </span><span style="color:#d08770;">execStartPre execStopPost host sshPath</span><span style="color:#c0c5ce;">;
-          </span><span style="color:#d08770;">enable </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">true</span><span style="color:#c0c5ce;">;
-          </span><span style="color:#d08770;">timeout </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">90000</span><span style="color:#c0c5ce;">;
-          </span><span style="color:#d08770;">username </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">root</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#d08770;">localFilesystem </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">rpool/safe</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#d08770;">remoteFilesystem </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">rpool/backup</span><span style="color:#c0c5ce;">&quot;;
-          </span><span style="color:#d08770;">identityFilePath </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">PATH_TO_AWS_KEY_PAIR</span><span style="color:#c0c5ce;">&quot;;
+          &#x27;&#x27;;
+          execStopPost = &quot;${honeycombCommand}&#x2F;bin&#x2F;reportResult&quot;;
+        in
+        {
+          inherit execStartPre execStopPost host sshPath;
+          enable = true;
+          timeout = 90000;
+          username = &quot;root&quot;;
+          localFilesystem = &quot;rpool&#x2F;safe&quot;;
+          remoteFilesystem = &quot;rpool&#x2F;backup&quot;;
+          identityFilePath = &quot;PATH_TO_AWS_KEY_PAIR&quot;;
         };
     })
-</span></code></pre>
+</code></pre>
 <p>That sets up a systemd service that runs after every snapshot. It also
 reports the result of the replication to
 <a href="https://www.honeycomb.io/">Honeycomb</a>, which brings us to our next

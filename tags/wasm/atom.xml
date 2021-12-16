@@ -18,12 +18,11 @@
 &lt;h2 id=&quot;how-much-faster&quot;&gt;How much faster?&lt;&#x2F;h2&gt;
 &lt;p&gt;On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.&lt;&#x2F;p&gt;
 &lt;p&gt;Following &lt;a href=&quot;https:&#x2F;&#x2F;blog.iron.io&#x2F;the-overhead-of-docker-run&#x2F;&quot;&gt;this experiment&lt;&#x2F;a&gt; I get these results:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;Running: .&#x2F;hello.sh
+&lt;pre&gt;&lt;code&gt;Running: .&amp;#x2F;hello.sh
 avg: 3.516431ms
-Running: docker run treeder&#x2F;hello:sh
+Running: docker run treeder&amp;#x2F;hello:sh
 avg: 692.306769ms
-Running: docker run --rm treeder&#x2F;hello:sh
+Running: docker run --rm treeder&amp;#x2F;hello:sh
 avg: 725.912422ms
 Running: docker start -a reuse
 avg: 655.059021ms
@@ -31,7 +30,7 @@ Running: node hello.js
 avg: 79.233337ms
 Running: wasmer run wasi-hello-world.wasm
 avg: 15.155896ms
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;img src=&quot;&#x2F;code&#x2F;wasm-graph.png&quot; alt=&quot;Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe.&quot; title=&quot;Safety vs Overhead&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;The trend is that if you want safety and isolation, you must pay for it with overhead. WASM&#x27;s exception to that rule is what I think makes it so promising and interesting. Wasm provides the fastest way to run arbitrary user code in a sandboxed environment.&lt;&#x2F;p&gt;
@@ -53,60 +52,55 @@ avg: 15.155896ms
 &lt;ol&gt;
 &lt;li&gt;Point your domain to TerraFirma servers (&lt;code&gt;terrafirma.marcopolo.io&lt;&#x2F;code&gt; or &lt;code&gt;52.53.126.109&lt;&#x2F;code&gt;) with an A record, and set a &lt;code&gt;TXT&lt;&#x2F;code&gt; record to point to your shared folder (e.g. &lt;code&gt;&amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;&lt;&#x2F;code&gt;)&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;pre&gt;&lt;code&gt;
 example.com 300 A terrafirma.marcopolo.io
 
-_keybase_pages.example.com 300 TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;
+_keybase_pages.example.com 300 TXT &amp;quot;kbp=&amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&amp;#x2F;&amp;quot;
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;2&quot;&gt;
 &lt;li&gt;Verify the DNS records are correct&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;pre&gt;&lt;code&gt;
 $ dig example.com A
 ...
 ;; ANSWER SECTION:
 wasm.marcopolo.io.      300     IN      A       52.53.126.109
 ...
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;br&#x2F;&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;br&#x2F;&gt;
+&lt;pre&gt;&lt;code&gt;
 $ dig _keybase_pages.example.com TXT
 ...
 ;; ANSWER SECTION:
-_keybase_pages.example.com &amp;lt;number&amp;gt; IN TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbpbot&#x2F;&amp;quot;
+_keybase_pages.example.com &amp;lt;number&amp;gt; IN TXT &amp;quot;kbp=&amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;my_keybase_username&amp;gt;,kbpbot&amp;#x2F;&amp;quot;
 ...
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;3&quot;&gt;
 &lt;li&gt;Clone the Hello World Repo&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;git clone git@github.com:MarcoPolo&#x2F;terrafirma-hello-world.git
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;git clone git@github.com:MarcoPolo&amp;#x2F;terrafirma-hello-world.git
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;4&quot;&gt;
 &lt;li&gt;Build it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cd terrafirma-hello-world
+&lt;pre&gt;&lt;code&gt;cd terrafirma-hello-world
 cargo build --release
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;5&quot;&gt;
 &lt;li&gt;Deploy it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
-cp target&#x2F;wasm32-unknown-unknown&#x2F;release&#x2F;terrafirma_helloworld.wasm &#x2F;keybase&#x2F;private&#x2F;&amp;lt;your_kb_username&amp;gt;,kbwasm&#x2F;hello.wasm
+&lt;pre&gt;&lt;code&gt;
+cp target&amp;#x2F;wasm32-unknown-unknown&amp;#x2F;release&amp;#x2F;terrafirma_helloworld.wasm &amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;your_kb_username&amp;gt;,kbwasm&amp;#x2F;hello.wasm
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;6&quot;&gt;
 &lt;li&gt;Test it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;curl https:&#x2F;&#x2F;example.com&#x2F;hello.wasm
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;</content>
+&lt;pre&gt;&lt;code&gt;curl https:&amp;#x2F;&amp;#x2F;example.com&amp;#x2F;hello.wasm
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
 	</entry>
 </feed>

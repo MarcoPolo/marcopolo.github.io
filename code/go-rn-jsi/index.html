@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -51,91 +51,87 @@
 <p>The binding is the C++ glue code that will hook up your Go code to the JS runtime. The binding itself is composed of two main parts.</p>
 <h4 id="part-1-1-the-c-binding">Part 1.1 - The C++ Binding</h4>
 <p>The binding is a c++ class that implements the <code>jsi::HostObject</code> interface. At the very least it's useful for it to have a <code>get</code> method defined. The type of the <code>get</code> method is:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">jsi::Value </span><span style="color:#8fa1b3;">get</span><span style="color:#c0c5ce;">(jsi::Runtime &amp;</span><span style="color:#bf616a;">runtime</span><span style="color:#c0c5ce;">, </span><span style="color:#b48ead;">const</span><span style="color:#c0c5ce;"> jsi::PropNameID &amp;</span><span style="color:#bf616a;">name</span><span style="color:#c0c5ce;">) </span><span style="color:#b48ead;">override</span><span style="color:#c0c5ce;">;
-</span></code></pre>
+<pre data-lang="c++" class="language-c++ "><code class="language-c++" data-lang="c++">jsi::Value get(jsi::Runtime &amp;runtime, const jsi::PropNameID &amp;name) override;
+</code></pre>
 <p>It returns a <code>jsi::Value</code> (a value that is safe for JS). It's given the JS runtime and the prop string used by JS when it <code>get</code>s the field. e.g. <code>global.nativeTest.foo</code> will call this method with PropNameID === <code>&quot;foo&quot;</code>.</p>
 <h4 id="part-1-2-the-c-binding-s-install">Part 1.2 - The C++ Binding's install</h4>
 <p>Now that we've defined our HostObject, we need to install it into the runtime. We use a static member function that we'll call later to set this up. It looks like this:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">void </span><span style="color:#c0c5ce;">TestBinding::</span><span style="color:#8fa1b3;">install</span><span style="color:#c0c5ce;">(jsi::Runtime &amp;</span><span style="color:#bf616a;">runtime</span><span style="color:#c0c5ce;">,
-                          std::shared_ptr&lt;TestBinding&gt; </span><span style="color:#bf616a;">testBinding</span><span style="color:#c0c5ce;">) {
-  </span><span style="color:#65737e;">// What is the name that js will use when it reaches for this?
-  // i.e. `global.nativeTest` in JS
-  </span><span style="color:#b48ead;">auto</span><span style="color:#c0c5ce;"> testModuleName = &quot;</span><span style="color:#a3be8c;">nativeTest</span><span style="color:#c0c5ce;">&quot;;
-  </span><span style="color:#65737e;">// Create a JS object version of our binding
-  </span><span style="color:#b48ead;">auto</span><span style="color:#c0c5ce;"> object = jsi::Object::</span><span style="color:#bf616a;">createFromHostObject</span><span style="color:#c0c5ce;">(runtime, testBinding);
-  </span><span style="color:#65737e;">// set the &quot;nativeTest&quot; propert
-</span><span style="color:#c0c5ce;">  runtime.</span><span style="color:#bf616a;">global</span><span style="color:#c0c5ce;">().</span><span style="color:#bf616a;">setProperty</span><span style="color:#c0c5ce;">(runtime, testModuleName, std::</span><span style="color:#bf616a;">move</span><span style="color:#c0c5ce;">(object));
+<pre data-lang="c++" class="language-c++ "><code class="language-c++" data-lang="c++">void TestBinding::install(jsi::Runtime &amp;runtime,
+                          std::shared_ptr&lt;TestBinding&gt; testBinding) {
+  &#x2F;&#x2F; What is the name that js will use when it reaches for this?
+  &#x2F;&#x2F; i.e. `global.nativeTest` in JS
+  auto testModuleName = &quot;nativeTest&quot;;
+  &#x2F;&#x2F; Create a JS object version of our binding
+  auto object = jsi::Object::createFromHostObject(runtime, testBinding);
+  &#x2F;&#x2F; set the &quot;nativeTest&quot; propert
+  runtime.global().setProperty(runtime, testModuleName, std::move(object));
 }
-</span></code></pre><h3 id="part-2-installing-the-binding-on-android">Part 2. Installing the binding (on Android)</h3>
+</code></pre>
+<h3 id="part-2-installing-the-binding-on-android">Part 2. Installing the binding (on Android)</h3>
 <p>Since we have a reference to the runtime in Java land, we'll have to create a JNI method to pass the runtime ptr to the native C++ land. We can add this JNI method to our TestBinding file with a guard.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">#if</span><span style="color:#c0c5ce;"> ANDROID
-</span><span style="color:#b48ead;">extern </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">C</span><span style="color:#c0c5ce;">&quot; {
-JNIEXPORT </span><span style="color:#b48ead;">void</span><span style="color:#c0c5ce;"> JNICALL </span><span style="color:#8fa1b3;">Java_com_testmodule_MainActivity_install</span><span style="color:#c0c5ce;">(
-    JNIEnv *</span><span style="color:#bf616a;">env</span><span style="color:#c0c5ce;">, jobject </span><span style="color:#bf616a;">thiz</span><span style="color:#c0c5ce;">, jlong </span><span style="color:#bf616a;">runtimePtr</span><span style="color:#c0c5ce;">) {
-  </span><span style="color:#b48ead;">auto</span><span style="color:#c0c5ce;"> testBinding = std::</span><span style="color:#bf616a;">make_shared</span><span style="color:#c0c5ce;">&lt;example::TestBinding&gt;();
+<pre data-lang="c++" class="language-c++ "><code class="language-c++" data-lang="c++">#if ANDROID
+extern &quot;C&quot; {
+JNIEXPORT void JNICALL Java_com_testmodule_MainActivity_install(
+    JNIEnv *env, jobject thiz, jlong runtimePtr) {
+  auto testBinding = std::make_shared&lt;example::TestBinding&gt;();
   jsi::Runtime *runtime = (jsi::Runtime *)runtimePtr;
 
-  example::TestBinding::</span><span style="color:#bf616a;">install</span><span style="color:#c0c5ce;">(*runtime, testBinding);
+  example::TestBinding::install(*runtime, testBinding);
 }
 }
-</span><span style="color:#b48ead;">#endif
-</span></code></pre>
+#endif
+</code></pre>
 <p>Then on the Java side (after we compile this into a shared library), we register this native function and call it when we're ready.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;">// In MainActivity
+<pre data-lang="java" class="language-java "><code class="language-java" data-lang="java">&#x2F;&#x2F; In MainActivity
 
-</span><span style="color:#b48ead;">public class </span><span style="color:#ebcb8b;">MainActivity </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">ReactActivity </span><span style="color:#b48ead;">implements </span><span style="color:#a3be8c;">ReactInstanceManager</span><span style="color:#eff1f5;">.</span><span style="color:#a3be8c;">ReactInstanceEventListener </span><span style="color:#eff1f5;">{
-    </span><span style="color:#b48ead;">static </span><span style="color:#eff1f5;">{
-        </span><span style="color:#65737e;">// Load our jni
-        </span><span style="color:#ebcb8b;">System</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">loadLibrary</span><span style="color:#eff1f5;">(</span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">test_module_jni</span><span style="color:#c0c5ce;">&quot;</span><span style="color:#eff1f5;">);
+public class MainActivity extends ReactActivity implements ReactInstanceManager.ReactInstanceEventListener {
+    static {
+        &#x2F;&#x2F; Load our jni
+        System.loadLibrary(&quot;test_module_jni&quot;);
     }
 
-    </span><span style="color:#65737e;">//... ellided ...
+    &#x2F;&#x2F;... ellided ...
 
-    </span><span style="color:#eff1f5;">@</span><span style="color:#bf616a;">Override
-    </span><span style="color:#b48ead;">public void </span><span style="color:#8fa1b3;">onReactContextInitialized</span><span style="color:#eff1f5;">(</span><span style="color:#ebcb8b;">ReactContext </span><span style="color:#bf616a;">context</span><span style="color:#eff1f5;">) {
-        </span><span style="color:#65737e;">// Call our native function with the runtime pointer
-        </span><span style="color:#bf616a;">install</span><span style="color:#eff1f5;">(context.</span><span style="color:#bf616a;">getJavaScriptContextHolder</span><span style="color:#eff1f5;">().</span><span style="color:#bf616a;">get</span><span style="color:#eff1f5;">());
+    @Override
+    public void onReactContextInitialized(ReactContext context) {
+        &#x2F;&#x2F; Call our native function with the runtime pointer
+        install(context.getJavaScriptContextHolder().get());
     }
 
-    </span><span style="color:#65737e;">//  declare our native function
-    </span><span style="color:#b48ead;">public native void </span><span style="color:#8fa1b3;">install</span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">long </span><span style="color:#bf616a;">jsContextNativePointer</span><span style="color:#eff1f5;">);
+    &#x2F;&#x2F;  declare our native function
+    public native void install(long jsContextNativePointer);
 }
-</span></code></pre><h3 id="part-3-calling-go">Part 3. Calling Go</h3>
+</code></pre>
+<h3 id="part-3-calling-go">Part 3. Calling Go</h3>
 <p>Now that our binding is installed in the runtime, we can make it do something useful.</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#c0c5ce;">jsi::Value TestBinding::</span><span style="color:#8fa1b3;">get</span><span style="color:#c0c5ce;">(jsi::Runtime &amp;</span><span style="color:#bf616a;">runtime</span><span style="color:#c0c5ce;">,
-                            </span><span style="color:#b48ead;">const</span><span style="color:#c0c5ce;"> jsi::PropNameID &amp;</span><span style="color:#bf616a;">name</span><span style="color:#c0c5ce;">) {
-  </span><span style="color:#b48ead;">auto</span><span style="color:#c0c5ce;"> methodName = name.</span><span style="color:#bf616a;">utf8</span><span style="color:#c0c5ce;">(runtime);
+<pre data-lang="c++" class="language-c++ "><code class="language-c++" data-lang="c++">jsi::Value TestBinding::get(jsi::Runtime &amp;runtime,
+                            const jsi::PropNameID &amp;name) {
+  auto methodName = name.utf8(runtime);
 
-  </span><span style="color:#b48ead;">if </span><span style="color:#c0c5ce;">(methodName == &quot;</span><span style="color:#a3be8c;">runTest</span><span style="color:#c0c5ce;">&quot;) {
-    </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">jsi::Function::</span><span style="color:#bf616a;">createFromHostFunction</span><span style="color:#c0c5ce;">(
-        runtime, name, </span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">,
-        [](jsi::Runtime &amp;runtime, </span><span style="color:#b48ead;">const</span><span style="color:#c0c5ce;"> jsi::Value &amp;thisValue,
-           </span><span style="color:#b48ead;">const</span><span style="color:#c0c5ce;"> jsi::Value *arguments,
-           size_t count) -&gt; </span><span style="color:#bf616a;">jsi</span><span style="color:#c0c5ce;">::</span><span style="color:#bf616a;">Value </span><span style="color:#c0c5ce;">{ </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TestNum</span><span style="color:#c0c5ce;">(); });
+  if (methodName == &quot;runTest&quot;) {
+    return jsi::Function::createFromHostFunction(
+        runtime, name, 0,
+        [](jsi::Runtime &amp;runtime, const jsi::Value &amp;thisValue,
+           const jsi::Value *arguments,
+           size_t count) -&gt; jsi::Value { return TestNum(); });
   }
-  </span><span style="color:#b48ead;">return </span><span style="color:#c0c5ce;">jsi::Value::</span><span style="color:#bf616a;">undefined</span><span style="color:#c0c5ce;">();
+  return jsi::Value::undefined();
 }
 
-</span></code></pre>
+</code></pre>
 <p>Here we return a <code>jsi::Function</code> when JS calls <code>global.nativeTest.runTest</code>. When JS calls it (as in <code>global.nativeTest.runTest()</code>) we execute the code inside the closure, which just returns <code>TestNum()</code>. TestNum is a Go function that's exported through cgo so that it is available to c/c++. Our Go code looks like this:</p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#b48ead;">package </span><span style="color:#bf616a;">main
+<pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">package main
 
-</span><span style="color:#b48ead;">import </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">C</span><span style="color:#c0c5ce;">&quot;
+import &quot;C&quot;
 
-</span><span style="color:#65737e;">// TestNum returns a test number to be used in JSI
-//export TestNum
-</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">TestNum</span><span style="color:#c0c5ce;">() </span><span style="color:#b48ead;">int </span><span style="color:#c0c5ce;">{
-	</span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">int</span><span style="color:#c0c5ce;">(</span><span style="color:#d08770;">9001</span><span style="color:#c0c5ce;">)
+&#x2F;&#x2F; TestNum returns a test number to be used in JSI
+&#x2F;&#x2F;export TestNum
+func TestNum() int {
+	return int(9001)
 }
-</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">main</span><span style="color:#c0c5ce;">() {
+func main() {
 }
-</span></code></pre>
+</code></pre>
 <p>cgo builds a header and creates a shared library that is used by our binding.</p>
 <h3 id="building">Building</h3>
 <ul>

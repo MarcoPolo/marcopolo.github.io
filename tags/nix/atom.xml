@@ -73,39 +73,37 @@ Linux&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
 &lt;p&gt;To be concrete, let me show an example. If I wanted to start a JS project and
 use &lt;a href=&quot;https:&#x2F;&#x2F;yarnpkg.com&#x2F;&quot;&gt;Yarn&lt;&#x2F;a&gt; as my dependency manager, I would do something
 like this: &lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 1. Create the project folder
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; my-project
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;# 1. Create the project folder
+mkdir my-project
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 2. Add the boilerplate files.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix flake init&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; github:marcopolo&#x2F;templates
+# 2. Add the boilerplate files.
+nix flake init -t github:marcopolo&amp;#x2F;templates
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 3. Edit flake.nix file to add yarn and NodeJS.
+# 3. Edit flake.nix file to add yarn and NodeJS.
 # With your text editor apply this diff:
 # -          buildInputs = [ pkgs.hello ];
 # +          buildInputs = [ pkgs.yarn pkgs.nodejs-12_x ];
 
 # 4. Allow direnv to run this environment. This will also fetch yarn with Nix
 #    and add it to your path.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;direnv allow
+direnv allow
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 5. Yarn is now available, proceed as normal. 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;yarn init
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+# 5. Yarn is now available, proceed as normal. 
+yarn init
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;You can simplify this further by making a Nix Flake template that already has
 Yarn and NodeJS included. &lt;&#x2F;p&gt;
 &lt;h2 id=&quot;another-example-setting-up-a-rust-project&quot;&gt;Another example. Setting up a Rust project.&lt;&#x2F;h2&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 1. Create the project folder
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; rust-project
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;# 1. Create the project folder
+mkdir rust-project
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 2. Add the boilerplate files.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix flake init&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; github:marcopolo&#x2F;templates#rust
+# 2. Add the boilerplate files.
+nix flake init -t github:marcopolo&amp;#x2F;templates#rust
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 3. Cargo and rust is now available, proceed as normal. 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cargo init
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cargo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; run
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+# 3. Cargo and rust is now available, proceed as normal. 
+cargo init
+cargo run
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Here we used a Rust specific template, so no post template init changes were required.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;dissecting-the-flake-nix-file&quot;&gt;Dissecting the &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file&lt;&#x2F;h2&gt;
 &lt;p&gt;Let&#x27;s break down the &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file so we can understand what it is we are
@@ -115,49 +113,49 @@ language&lt;&#x2F;a&gt;. At a high level you
 can read this as JSON but with functions. Like JSON it can only represent
 expressions (you can only have one top level JSON object), unlike JSON you can
 have functions and variables. &lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is our top level set expression. Equivalent to the top level JSON object.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# These are comments
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;# This is our top level set expression. Equivalent to the top level JSON object.
+{
+  # These are comments
 
   # Here we are defining a set. This is equivalent to a JSON object.
   # The key is description, and the value is the string.
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;description &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;A very basic flake&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  description = &amp;quot;A very basic flake&amp;quot;;
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# You can define nested sets by using a `.` between key parts.
+  # You can define nested sets by using a `.` between key parts.
   # This is equivalent to the JSON object {inputs: {flake-utils: {url: &amp;quot;github:...&amp;quot;}}}
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;flake-utils&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github:numtide&#x2F;flake-utils&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+  inputs.flake-utils.url = &amp;quot;github:numtide&amp;#x2F;flake-utils&amp;quot;;
 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Functions are defined with the syntax of `param: functionBodyExpression`.
+  # Functions are defined with the syntax of `param: functionBodyExpression`.
   # The param can be destructured if it expects a set, like what we are doing here. 
   # This defines the output of this flake. Our dev environment will make use of
   # the devShell attribute, but you can also define the release build of your
   # package here.
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;self, nixpkgs, flake-utils &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;:
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is a helper to generate these outputs for each system (x86-linux,
+  outputs = { self, nixpkgs, flake-utils }:
+    # This is a helper to generate these outputs for each system (x86-linux,
     # arm-linux, macOS, ...)
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;flake-utils&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lib&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;eachDefaultSystem &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(system:
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# The nixpkgs repo has to know which system we are using.
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;system &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;; };
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is the environment that direnv will use. You can also enter the
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        # The nixpkgs repo has to know which system we are using.
+        pkgs = import nixpkgs { system = system; };
+      in
+      {
+        # This is the environment that direnv will use. You can also enter the
         # shell with `nix shell`. The packages in `buildInputs` are what become
         # available to you in your $PATH. As an example this only has the hello
         # package.
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;devShell &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildInputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hello &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
+        devShell = pkgs.mkShell {
+          buildInputs = [ pkgs.hello ];
         };
 
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# You can also define a package that is built by default when you run
+        # You can also define a package that is built by default when you run
         # `nix build`.  The build command creates a new folder, `result`, that
         # is a symlink to the build output.
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;defaultPackage &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+        defaultPackage = pkgs.hello;
       });
 }
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;on-dev-tools-and-a-dev-setup&quot;&gt;On Dev Tools and A Dev Setup&lt;&#x2F;h2&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;on-dev-tools-and-a-dev-setup&quot;&gt;On Dev Tools and A Dev Setup&lt;&#x2F;h2&gt;
 &lt;p&gt;There is a subtle distinction on what constitutes a Dev Tool vs A Dev Setup. I
 classify Dev Tools as things that need to be available to build or develop a given
 project specifically. Think of &lt;code&gt;gcc&lt;&#x2F;code&gt;, &lt;code&gt;yarn&lt;&#x2F;code&gt;, or &lt;code&gt;cargo&lt;&#x2F;code&gt;. The Dev Setup category
@@ -254,11 +252,10 @@ option of whether you want state to be persisted, and defines a Systemd
 service for the vm (There can be multiple VMs). This really is a simple
 module, the NixOS service definition is about 10 lines long, and its
 &lt;code&gt;ExecStart&lt;&#x2F;code&gt; is simply:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir -p &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
-cd &#x2F;var&#x2F;lib&#x2F;simple-vms&#x2F;${name}
-exec ${cfg.vm.out}&#x2F;bin&#x2F;run-nixos-vm;
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;mkdir -p &amp;#x2F;var&amp;#x2F;lib&amp;#x2F;simple-vms&amp;#x2F;${name}
+cd &amp;#x2F;var&amp;#x2F;lib&amp;#x2F;simple-vms&amp;#x2F;${name}
+exec ${cfg.vm.out}&amp;#x2F;bin&amp;#x2F;run-nixos-vm;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;With this service we can get and keep our VMs up and running.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;stateless-vms&quot;&gt;Stateless VMs&lt;&#x2F;h2&gt;
 &lt;p&gt;I got a sticker recently that said &amp;quot;You either have one source of truth, of
@@ -314,11 +311,10 @@ is as easy as doing &lt;code&gt;zfs snapshot tank&#x2F;home&#x2F;marco@friday&lt
 &lt;h3 id=&quot;automatic-snapshots&quot;&gt;Automatic snapshots&lt;&#x2F;h3&gt;
 &lt;p&gt;On NixOS setting up automatic snapshots is a breeze, just add the following to
 your NixOS Configuration:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;zfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;autoSnapshot&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;{
+  services.zfs.autoSnapshot.enable = true;
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;and setting the &lt;code&gt;com.sun:auto-snapshot&lt;&#x2F;code&gt; option on the filesystem. E.g.: &lt;code&gt;zfs set com.sun:auto-snapshot=true &amp;lt;pool&amp;gt;&#x2F;&amp;lt;fs&amp;gt;&lt;&#x2F;code&gt;. Note that this can also be done on
 creation of the filesystem: &lt;code&gt;zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true tank&#x2F;home&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;With that enabled, ZFS will keep a snapshot for the latest 4 15-minute, 24
@@ -342,9 +338,8 @@ available. With &lt;code&gt;lazyssh&lt;&#x2F;code&gt; we can make &lt;code&gt;ho
 command finishes. The command with &lt;code&gt;lazyssh&lt;&#x2F;code&gt; would look something like this
 (assuming you have a &lt;code&gt;lazyssh&lt;&#x2F;code&gt; target in your &lt;code&gt;.ssh&#x2F;config&lt;&#x2F;code&gt; as explained in the
 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;stephank&#x2F;lazyssh&quot;&gt;docs&lt;&#x2F;a&gt;):&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;host1# zfs send tank&#x2F;dana@snap1 | ssh -J lazyssh host2 zfs recv newtank&#x2F;dana
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;host1# zfs send tank&amp;#x2F;dana@snap1 | ssh -J lazyssh host2 zfs recv newtank&amp;#x2F;dana
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Note the only difference is the &lt;code&gt;-J lazyssh&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;So how do we actually setup &lt;code&gt;lazyssh&lt;&#x2F;code&gt; to do this? Here is my configuration:&lt;&#x2F;p&gt;
 &lt;div &gt;
@@ -364,44 +359,42 @@ config and known_hosts file so these are automatically correct and properly
 setup. I generate the lines for known_hosts when I generate the host keys
 that go in the &lt;code&gt;user_data&lt;&#x2F;code&gt; field in the &lt;code&gt;lazsyssh-config.hcl&lt;&#x2F;code&gt; above. Here&#x27;s the
 relevant section from my homemanager config:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;programs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;ssh &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;{
+  programs.ssh = {
+    enable = true;
 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# I keep this file tracked in Git alongside my NixOS configs.
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;userKnownHostsFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;path&#x2F;to&#x2F;known_hosts&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;matchBlocks &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
-      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;user &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hostname &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;proxyJump &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lazyssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_AWS_KEYPAIR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+    # I keep this file tracked in Git alongside my NixOS configs.
+    userKnownHostsFile = &amp;quot;&amp;#x2F;path&amp;#x2F;to&amp;#x2F;known_hosts&amp;quot;;
+    matchBlocks = {
+      &amp;quot;archiver&amp;quot; = {
+        user = &amp;quot;root&amp;quot;;
+        hostname = &amp;quot;archiver&amp;quot;;
+        proxyJump = &amp;quot;lazyssh&amp;quot;;
+        identityFile = &amp;quot;PATH_TO_AWS_KEYPAIR&amp;quot;;
       };
 
-      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lazyssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This assume you are running lazyssh locally, but it can also
+      &amp;quot;lazyssh&amp;quot; = {
+        # This assume you are running lazyssh locally, but it can also
         # reference another machine.
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hostname &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;localhost&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;port &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;7922&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;user &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;jump&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_LAZYSSH_CLIENT_KEY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identitiesOnly &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;extraOptions &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= {
-          &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PreferredAuthentications&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;publickey&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+        hostname = &amp;quot;localhost&amp;quot;;
+        port = 7922;
+        user = &amp;quot;jump&amp;quot;;
+        identityFile = &amp;quot;PATH_TO_LAZYSSH_CLIENT_KEY&amp;quot;;
+        identitiesOnly = true;
+        extraOptions = {
+          &amp;quot;PreferredAuthentications&amp;quot; = &amp;quot;publickey&amp;quot;;
         };
       };
     };
   };
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Finally, I use the provided NixOS Module for &lt;code&gt;lazyssh&lt;&#x2F;code&gt; to manage starting it and
 keeping it up. Here&#x27;s the relevant parts from my &lt;code&gt;flake.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
+&lt;pre&gt;&lt;code&gt;{
   # My fork that supports placements and terminating instances after failing to
   # attach volume.
-  inputs.lazyssh.url = &amp;quot;github:marcopolo&#x2F;lazyssh&#x2F;attach-volumes&amp;quot;;
+  inputs.lazyssh.url = &amp;quot;github:marcopolo&amp;#x2F;lazyssh&amp;#x2F;attach-volumes&amp;quot;;
   inputs.lazyssh.inputs.nixpkgs.follows = &amp;quot;nixpkgs&amp;quot;;
 
     outputs =
@@ -417,10 +410,10 @@ keeping it up. Here&#x27;s the relevant parts from my &lt;code&gt;flake.nix&lt;&
               {
                 imports = [lazyssh.nixosModule]
                 services.lazyssh.configFile =
-                  &amp;quot;&#x2F;path&#x2F;to&#x2F;lazyssh-config.hcl&amp;quot;;
-                # You&amp;#39;ll need to add the correct AWS credentials to `&#x2F;home&#x2F;lazyssh&#x2F;.aws`
+                  &amp;quot;&amp;#x2F;path&amp;#x2F;to&amp;#x2F;lazyssh-config.hcl&amp;quot;;
+                # You&amp;#x27;ll need to add the correct AWS credentials to `&amp;#x2F;home&amp;#x2F;lazyssh&amp;#x2F;.aws`
                 # This could probably be a symlink with home-manager to a
-                # managed file somewhere else, but I haven&amp;#39;t go down that path
+                # managed file somewhere else, but I haven&amp;#x27;t go down that path
                 # yet
                 users.users.lazyssh = {
                   isNormalUser = true;
@@ -432,7 +425,7 @@ keeping it up. Here&#x27;s the relevant parts from my &lt;code&gt;flake.nix&lt;&
       };
     }
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;With all that setup, I can ssh into the archiver by simple running &lt;code&gt;ssh archiver&lt;&#x2F;code&gt;. Under the hood, &lt;code&gt;lazyssh&lt;&#x2F;code&gt; starts the EC2 instance and attaches the
 EBS drive to it. And since &lt;code&gt;ssh archiver&lt;&#x2F;code&gt; works, so does the original example
 of: &lt;code&gt;zfs send tank&#x2F;dana@snap1 | ssh archiver zfs recv newtank&#x2F;dana&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
@@ -455,43 +448,42 @@ a while to warm-up the instance.&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
 &lt;p&gt;Thankfully with flakes, using my own fork was painless. Here&#x27;s the relevant
 section from my &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# inputs.zfs-replicate.url = &amp;quot;github:marcopolo&#x2F;zfs-replicate&#x2F;flake&amp;quot;;
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;  # inputs.zfs-replicate.url = &amp;quot;github:marcopolo&amp;#x2F;zfs-replicate&amp;#x2F;flake&amp;quot;;
   # ...
   # Inside nixosSystem modules...
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;pkgs, ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;:
+  ({ pkgs, ... }:
     {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;imports &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;zfs-replicate&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixosModule &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Disable the existing module
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;disabledModules &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;services&#x2F;backup&#x2F;zfs-replication.nix&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; ];
+      imports = [ zfs-replicate.nixosModule ];
+      # Disable the existing module
+      disabledModules = [ &amp;quot;services&amp;#x2F;backup&amp;#x2F;zfs-replication.nix&amp;quot; ];
 
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;zfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;autoReplication &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;=
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;host &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archiver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sshPath &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;openssh&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;ssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Make sure the machine is up-to-date
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStartPre &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;sshPath&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;} ${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;host&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; nixos-rebuild switch&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;honeycombAPIKey &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;secrets.nix&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;honeycomb_api_key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;honeycombCommand &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;writeScriptBin &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;reportResult&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
-            #!&#x2F;usr&#x2F;bin&#x2F;env &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;bash&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;bash
-            &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;curl&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;curl https:&#x2F;&#x2F;api.honeycomb.io&#x2F;1&#x2F;events&#x2F;zfs-replication -X POST \
-              -H &amp;quot;X-Honeycomb-Team: &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;honeycombAPIKey&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;quot; \
-              -H &amp;quot;X-Honeycomb-Event-Time: $(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;coreutils&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;date -u +&amp;quot;%Y-%m-%dT%H:%M:%SZ&amp;quot;)&amp;quot; \
+      services.zfs.autoReplication =
+        let
+          host = &amp;quot;archiver&amp;quot;;
+          sshPath = &amp;quot;${pkgs.openssh}&amp;#x2F;bin&amp;#x2F;ssh&amp;quot;;
+          # Make sure the machine is up-to-date
+          execStartPre = &amp;quot;${sshPath} ${host} nixos-rebuild switch&amp;quot;;
+          honeycombAPIKey = (import .&amp;#x2F;secrets.nix).honeycomb_api_key;
+          honeycombCommand = pkgs.writeScriptBin &amp;quot;reportResult&amp;quot; &amp;#x27;&amp;#x27;
+            #!&amp;#x2F;usr&amp;#x2F;bin&amp;#x2F;env ${pkgs.bash}&amp;#x2F;bin&amp;#x2F;bash
+            ${pkgs.curl}&amp;#x2F;bin&amp;#x2F;curl https:&amp;#x2F;&amp;#x2F;api.honeycomb.io&amp;#x2F;1&amp;#x2F;events&amp;#x2F;zfs-replication -X POST \
+              -H &amp;quot;X-Honeycomb-Team: ${honeycombAPIKey}&amp;quot; \
+              -H &amp;quot;X-Honeycomb-Event-Time: $(${pkgs.coreutils}&amp;#x2F;bin&amp;#x2F;date -u +&amp;quot;%Y-%m-%dT%H:%M:%SZ&amp;quot;)&amp;quot; \
               -d &amp;quot;{\&amp;quot;serviceResult\&amp;quot;:\&amp;quot;$SERVICE_RESULT\&amp;quot;, \&amp;quot;exitCode\&amp;quot;: \&amp;quot;$EXIT_CODE\&amp;quot;, \&amp;quot;exitStatus\&amp;quot;: \&amp;quot;$EXIT_STATUS\&amp;quot;}&amp;quot;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStopPost &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;honeycombCommand&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;reportResult&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;inherit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;execStartPre execStopPost host sshPath&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;timeout &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;90000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;username &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;localFilesystem &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rpool&#x2F;safe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;remoteFilesystem &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rpool&#x2F;backup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;identityFilePath &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;PATH_TO_AWS_KEY_PAIR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
+          &amp;#x27;&amp;#x27;;
+          execStopPost = &amp;quot;${honeycombCommand}&amp;#x2F;bin&amp;#x2F;reportResult&amp;quot;;
+        in
+        {
+          inherit execStartPre execStopPost host sshPath;
+          enable = true;
+          timeout = 90000;
+          username = &amp;quot;root&amp;quot;;
+          localFilesystem = &amp;quot;rpool&amp;#x2F;safe&amp;quot;;
+          remoteFilesystem = &amp;quot;rpool&amp;#x2F;backup&amp;quot;;
+          identityFilePath = &amp;quot;PATH_TO_AWS_KEY_PAIR&amp;quot;;
         };
     })
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;That sets up a systemd service that runs after every snapshot. It also
 reports the result of the replication to
 &lt;a href=&quot;https:&#x2F;&#x2F;www.honeycomb.io&#x2F;&quot;&gt;Honeycomb&lt;&#x2F;a&gt;, which brings us to our next
@@ -564,17 +556,16 @@ depending on the world being in a certain state. Instead, &lt;em&gt;A&lt;&#x2F;e
 what a piece of software needs to build and run. Here&#x27;s an example of the
 definition on how to build the &lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org&#x2F;software&#x2F;hello&#x2F;&quot;&gt;GNU
 Hello&lt;&#x2F;a&gt; program:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;nixpkgs&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{});
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;derivation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;builder &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;bash&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;bash&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;args &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;builder.sh &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildInputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;gnutar gzip gnumake gcc binutils-unwrapped coreutils gawk gnused gnugrep &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;src &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;hello-2.10.tar.gz&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;system &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;builtins&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;currentSystem&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;with (import &amp;lt;nixpkgs&amp;gt; {});
+derivation {
+  name = &amp;quot;hello&amp;quot;;
+  builder = &amp;quot;${bash}&amp;#x2F;bin&amp;#x2F;bash&amp;quot;;
+  args = [ .&amp;#x2F;builder.sh ];
+  buildInputs = [ gnutar gzip gnumake gcc binutils-unwrapped coreutils gawk gnused gnugrep ];
+  src = .&amp;#x2F;hello-2.10.tar.gz;
+  system = builtins.currentSystem;
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;It&#x27;s not necessary to explain this &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;guides&#x2F;nix-pills&#x2F;generic-builders.html#idm140737320275008&quot;&gt;code in
 detail&lt;&#x2F;a&gt;.
 It&#x27;s enough to point out that &lt;code&gt;buildInputs&lt;&#x2F;code&gt; defines what the environment should
@@ -592,56 +583,54 @@ same exact shared library &lt;em&gt;B&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
 fundamental change in how Nix Flakes works, will work forever&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; on an x86_64
 linux machine.&lt;&#x2F;p&gt;
 &lt;p&gt;The definition of our program, &lt;code&gt;flake.nix&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;nixos-20.09&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;self, nixpkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;:
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;legacyPackages&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x86_64-linux&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;defaultPackage&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;x86_64-linux &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;writeScriptBin &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello-smalltalk&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &amp;#39;&amp;#39;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#bf616a;&quot;&gt;gnu-smalltalk&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ab7967;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;gst &amp;lt;&amp;lt;&amp;lt; &amp;quot;Transcript show: &amp;#39;Hello World!&amp;#39;.&amp;quot;
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
-    }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;{
+  inputs.nixpkgs.url = &amp;quot;github:NixOS&amp;#x2F;nixpkgs&amp;#x2F;nixos-20.09&amp;quot;;
+  outputs =
+    { self, nixpkgs }:
+    let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    in
+    {
+      defaultPackage.x86_64-linux = pkgs.writeScriptBin &amp;quot;hello-smalltalk&amp;quot; &amp;#x27;&amp;#x27;
+        ${pkgs.gnu-smalltalk}&amp;#x2F;bin&amp;#x2F;gst &amp;lt;&amp;lt;&amp;lt; &amp;quot;Transcript show: &amp;#x27;Hello World!&amp;#x27;.&amp;quot;
+      &amp;#x27;&amp;#x27;;
+    };
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The pinned version of all our dependencies, &lt;code&gt;flake.lock&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nodes&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;locked&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lastModified&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1606669556&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;narHash&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256-9rlqZ5JwnA6nK04vKhV0s5ndepnWL5hpkaTV1b4ASvk=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;owner&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NixOS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rev&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ae47c79479a086e96e2977c61e538881913c0c08&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+&lt;pre data-lang=&quot;json&quot; class=&quot;language-json &quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;nodes&amp;quot;: {
+    &amp;quot;nixpkgs&amp;quot;: {
+      &amp;quot;locked&amp;quot;: {
+        &amp;quot;lastModified&amp;quot;: 1606669556,
+        &amp;quot;narHash&amp;quot;: &amp;quot;sha256-9rlqZ5JwnA6nK04vKhV0s5ndepnWL5hpkaTV1b4ASvk=&amp;quot;,
+        &amp;quot;owner&amp;quot;: &amp;quot;NixOS&amp;quot;,
+        &amp;quot;repo&amp;quot;: &amp;quot;nixpkgs&amp;quot;,
+        &amp;quot;rev&amp;quot;: &amp;quot;ae47c79479a086e96e2977c61e538881913c0c08&amp;quot;,
+        &amp;quot;type&amp;quot;: &amp;quot;github&amp;quot;
       },
-      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;original&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;owner&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NixOS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ref&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixos-20.09&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+      &amp;quot;original&amp;quot;: {
+        &amp;quot;owner&amp;quot;: &amp;quot;NixOS&amp;quot;,
+        &amp;quot;ref&amp;quot;: &amp;quot;nixos-20.09&amp;quot;,
+        &amp;quot;repo&amp;quot;: &amp;quot;nixpkgs&amp;quot;,
+        &amp;quot;type&amp;quot;: &amp;quot;github&amp;quot;
       }
     },
-    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-      &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: {
-        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;
+    &amp;quot;root&amp;quot;: {
+      &amp;quot;inputs&amp;quot;: {
+        &amp;quot;nixpkgs&amp;quot;: &amp;quot;nixpkgs&amp;quot;
       }
     }
   },
-  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;,
-  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;version&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;7
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;}
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+  &amp;quot;root&amp;quot;: &amp;quot;root&amp;quot;,
+  &amp;quot;version&amp;quot;: 7
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;copy those files into a directory and run it:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;❯&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; nix run
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; World!
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;solid-foundations&quot;&gt;Solid Foundations&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;❯ nix run
+Hello World!
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;solid-foundations&quot;&gt;Solid Foundations&lt;&#x2F;h2&gt;
 &lt;p&gt;With Nix, we can make steady forward progress. Without fear that our foundations
 will collapse under us like sand castles. Once we&#x27;ve built something in Nix we
 can be pretty sure it will work for our colleague or ourselves in 10 years. Nix
@@ -679,19 +668,18 @@ general idea is you have a stage as your builder and another stage as your
 product. This allows you to have a full development and build container while
 still having a lean production container. The production container only carries
 its runtime dependencies.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; golang:1.7.3
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;go get -d -v golang.org&#x2F;x&#x2F;net&#x2F;html
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; app.go .
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+&lt;pre data-lang=&quot;dockerfile&quot; class=&quot;language-dockerfile &quot;&gt;&lt;code class=&quot;language-dockerfile&quot; data-lang=&quot;dockerfile&quot;&gt;FROM golang:1.7.3
+WORKDIR &amp;#x2F;go&amp;#x2F;src&amp;#x2F;github.com&amp;#x2F;alexellis&amp;#x2F;href-counter&amp;#x2F;
+RUN go get -d -v golang.org&amp;#x2F;x&amp;#x2F;net&amp;#x2F;html
+COPY app.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; alpine:latest
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;apk --no-cache add ca-certificates
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;root&#x2F;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;go&#x2F;src&#x2F;github.com&#x2F;alexellis&#x2F;href-counter&#x2F;app .
-CMD [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;app&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR &amp;#x2F;root&amp;#x2F;
+COPY --from=0 &amp;#x2F;go&amp;#x2F;src&amp;#x2F;github.com&amp;#x2F;alexellis&amp;#x2F;href-counter&amp;#x2F;app .
+CMD [&amp;quot;.&amp;#x2F;app&amp;quot;]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;(from Docker&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;develop&#x2F;develop-images&#x2F;multistage-build&#x2F;&quot;&gt;docs on multi-stage&lt;&#x2F;a&gt;)&lt;&#x2F;p&gt;
 &lt;p&gt;Sounds great, right? What&#x27;s the catch? Well, it&#x27;s not always easy to know what the
 runtime dependencies are. For example you may have installed something in &#x2F;lib
@@ -713,35 +701,34 @@ expectation is that this will result in a minimal production container.&lt;&#x2F
 &lt;h2 id=&quot;example&quot;&gt;Example&lt;&#x2F;h2&gt;
 &lt;p&gt;As a simple example let&#x27;s package a &amp;quot;Hello World&amp;quot; program in Rust. The code is
 what you&#x27;d expect:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello, world!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;);
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;pub fn main() {
+    println!(&amp;quot;Hello, world!&amp;quot;);
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;nix-build-expression&quot;&gt;Nix build expression&lt;&#x2F;h3&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;nix-build-expression&quot;&gt;Nix build expression&lt;&#x2F;h3&gt;
 &lt;p&gt;If we were just building this locally, we&#x27;d just run &lt;code&gt;cargo build --release&lt;&#x2F;code&gt;.
 But we are going to have Nix build this for us so that it can track the runtime
 dependencies. Therefore we need a &lt;code&gt;default.nix&lt;&#x2F;code&gt; file to describe the build
 process. Our &lt;code&gt;default.nix&lt;&#x2F;code&gt; build file looks like this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;nixpkgs&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{});
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rustPlatform&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;buildRustPackage &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;hello-rust&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildInputs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cargo rustc &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;];
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;src &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is a shasum over our crate dependencies
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;cargoSha256 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1s4vg081ci6hskb3kk965nxnx384w8xb7n7yc4g93hj55qsk4vw5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Use this to figure out the correct Sha256
+&lt;pre data-lang=&quot;nix&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;with (import &amp;lt;nixpkgs&amp;gt; {});
+rustPlatform.buildRustPackage {
+  name = &amp;quot;hello-rust&amp;quot;;
+  buildInputs = [ cargo rustc ];
+  src = .&amp;#x2F;.;
+  # This is a shasum over our crate dependencies
+  cargoSha256 = &amp;quot;1s4vg081ci6hskb3kk965nxnx384w8xb7n7yc4g93hj55qsk4vw5&amp;quot;;
+  # Use this to figure out the correct Sha256
   # cargoSha256 = lib.fakeSha256;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;buildPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+  buildPhase = &amp;#x27;&amp;#x27;
     cargo build --release
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;checkPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;quot;&amp;quot;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;installPhase &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;= &amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
-    mkdir -p $out&#x2F;bin
-    cp target&#x2F;release&#x2F;hello $out&#x2F;bin
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;#39;&amp;#39;;
+  &amp;#x27;&amp;#x27;;
+  checkPhase = &amp;quot;&amp;quot;;
+  installPhase = &amp;#x27;&amp;#x27;
+    mkdir -p $out&amp;#x2F;bin
+    cp target&amp;#x2F;release&amp;#x2F;hello $out&amp;#x2F;bin
+  &amp;#x27;&amp;#x27;;
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Breaking down the Nix expression: we specify what our inputs our to our
 build: &lt;code&gt;cargo&lt;&#x2F;code&gt; and &lt;code&gt;rustc&lt;&#x2F;code&gt;; we figure out what the sha256sum is of our crate
 dependencies; and we define some commands to build and install the executable.&lt;&#x2F;p&gt;
@@ -755,44 +742,43 @@ can add Docker to the mix. The goal is to have a builder stage that runs the
 nix-build command, then have a production stage that copies the executable and
 its runtime dependencies from builder. The production stage container will
 therefore have only the minimal amount of stuff needed to run.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Use nix as the builder
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; nixos&#x2F;nix:latest &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;AS &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder
+&lt;pre data-lang=&quot;Dockerfile&quot; class=&quot;language-Dockerfile &quot;&gt;&lt;code class=&quot;language-Dockerfile&quot; data-lang=&quot;Dockerfile&quot;&gt;# Use nix as the builder
+FROM nixos&amp;#x2F;nix:latest AS builder
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Update the channel so we can get the latest packages
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-channel --update nixpkgs
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;
-WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;app
+# Update the channel so we can get the latest packages
+RUN nix-channel --update nixpkgs
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Run the builder first without our code to fetch build dependencies.
-# This will fail, but that&amp;#39;s okay. We just want to have the build dependencies
+WORKDIR &amp;#x2F;app
+
+# Run the builder first without our code to fetch build dependencies.
+# This will fail, but that&amp;#x27;s okay. We just want to have the build dependencies
 # cached as a layer. This is just a caching optimization that can be removed.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; default.nix .
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-build . || true
+COPY default.nix .
+RUN nix-build . || true
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; . .
+COPY . .
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Now that our code is here we actually build it
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;nix-build .
+# Now that our code is here we actually build it
+RUN nix-build .
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Copy all the run time dependencies into &#x2F;tmp&#x2F;nix-store-closure
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;mkdir &#x2F;tmp&#x2F;nix-store-closure
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;echo &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Output references (Runtime dependencies):&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; $(nix-store -qR result&#x2F;)
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;RUN &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cp -R $(nix-store -qR result&#x2F;) &#x2F;tmp&#x2F;nix-store-closure
+# Copy all the run time dependencies into &amp;#x2F;tmp&amp;#x2F;nix-store-closure
+RUN mkdir &amp;#x2F;tmp&amp;#x2F;nix-store-closure
+RUN echo &amp;quot;Output references (Runtime dependencies):&amp;quot; $(nix-store -qR result&amp;#x2F;)
+RUN cp -R $(nix-store -qR result&amp;#x2F;) &amp;#x2F;tmp&amp;#x2F;nix-store-closure
 
-ENTRYPOINT [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;sh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; ]
+ENTRYPOINT [ &amp;quot;&amp;#x2F;bin&amp;#x2F;sh&amp;quot; ]
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Our production stage
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; scratch
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;WORKDIR &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&#x2F;app
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Copy the runtime dependencies into &#x2F;nix&#x2F;store
-# Note we don&amp;#39;t actually have nix installed on this container. But that&amp;#39;s fine,
-# we don&amp;#39;t need it, the built code only relies on the given files existing, not
+# Our production stage
+FROM scratch
+WORKDIR &amp;#x2F;app
+# Copy the runtime dependencies into &amp;#x2F;nix&amp;#x2F;store
+# Note we don&amp;#x27;t actually have nix installed on this container. But that&amp;#x27;s fine,
+# we don&amp;#x27;t need it, the built code only relies on the given files existing, not
 # Nix.
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;tmp&#x2F;nix-store-closure &#x2F;nix&#x2F;store
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;COPY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; --from=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; &#x2F;app&#x2F;result &#x2F;app
-CMD [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;app&#x2F;bin&#x2F;hello&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+COPY --from=builder &amp;#x2F;tmp&amp;#x2F;nix-store-closure &amp;#x2F;nix&amp;#x2F;store
+COPY --from=builder &amp;#x2F;app&amp;#x2F;result &amp;#x2F;app
+CMD [&amp;quot;&amp;#x2F;app&amp;#x2F;bin&amp;#x2F;hello&amp;quot;]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;If we build this &lt;code&gt;Dockerfile&lt;&#x2F;code&gt; with &lt;code&gt;docker build .&lt;&#x2F;code&gt;, we&#x27;ll end up with an 33MB
 container. Compare this to a naive
 &lt;a href=&quot;https:&#x2F;&#x2F;gist.github.com&#x2F;MarcoPolo&#x2F;7953f1ca2691405b5b04659027967336&quot;&gt;Dockerfile&lt;&#x2F;a&gt;

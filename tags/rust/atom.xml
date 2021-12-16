@@ -21,64 +21,58 @@
 &lt;li&gt;Look at this &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rust-lang&#x2F;rfcs&#x2F;issues&#x2F;2771&quot;&gt;issue&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;p&gt;Imagine you have some C code that provides &lt;code&gt;add_two&lt;&#x2F;code&gt;. It looks like this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;)
+&lt;pre data-lang=&quot;c&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;int add_two(int n)
 {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; n + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+    return n + 2;
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;And you can even let Cargo deal with building your C library by making a build.rs with &lt;code&gt;cc&lt;&#x2F;code&gt;. Like so:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; cc;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;use cc;
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-    cc::Build::new().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;file&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;src&#x2F;c&#x2F;foo.c&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;compile&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;);
+fn main() {
+    cc::Build::new().file(&amp;quot;src&amp;#x2F;c&amp;#x2F;foo.c&amp;quot;).compile(&amp;quot;foo&amp;quot;);
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now you want to be able to call &lt;code&gt;add_two&lt;&#x2F;code&gt; from Rust. Easy! You look at the &lt;a href=&quot;https:&#x2F;&#x2F;doc.rust-lang.org&#x2F;nomicon&#x2F;ffi.html&quot;&gt;FFI&lt;&#x2F;a&gt; section in the Nomicon. And follow it like so:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;link&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(name = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;, kind = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;)]
-#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;no_mangle&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u32&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u32&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;#[link(name = &amp;quot;foo&amp;quot;, kind = &amp;quot;static&amp;quot;)]
+#[no_mangle]
+extern &amp;quot;C&amp;quot; {
+    pub fn add_two(x: u32) -&amp;gt; u32;
 }
 
-#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;no_mangle&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub extern &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_one&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u32&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u32 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt; a = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsafe &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(x) };
-    a - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;}
+#[no_mangle]
+pub extern &amp;quot;C&amp;quot; fn add_one(x: u32) -&amp;gt; u32 {
+    let a = unsafe { add_two(x) };
+    a - 1
+}
 
-#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cfg&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(test)]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mod &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;tests {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use super&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;::*;
-    #[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;test&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;]
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;it_works&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;() {
-        assert_eq!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;add_one&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-        assert_eq!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsafe &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;) }, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn it_works() {
+        assert_eq!(add_one(2), 3);
+        assert_eq!(unsafe { add_two(2) }, 4);
     }
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now for the last chain in our telephone. We&#x27;ll make a new C file that will call our Rust defined &lt;code&gt;add_one&lt;&#x2F;code&gt; and our C defined &lt;code&gt;add_two&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_one&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;);
+&lt;pre data-lang=&quot;c&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;extern int add_one(int n);
+extern int add_two(int n);
 
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;()
+int main()
 {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;add_one&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;add_two&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;39&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;));
+    return add_one(add_two(39));
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;We use Clang to build this file:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;clang call_rust.c -lrust_c_playground -L.&#x2F;target&#x2F;debug -o call_rust
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;clang call_rust.c -lrust_c_playground -L.&amp;#x2F;target&amp;#x2F;debug -o call_rust
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now we have an executable called &lt;code&gt;call_rust&lt;&#x2F;code&gt; which calls a Rust defined function and calls a C defined function that it pulled in from a single Rust Library (called &lt;code&gt;librust_c_playground.dylib&lt;&#x2F;code&gt; on macOS). The flags in the clang command mean: &lt;code&gt;-l&lt;&#x2F;code&gt; link this library; &lt;code&gt;-L&lt;&#x2F;code&gt; look here for the library.&lt;&#x2F;p&gt;
 &lt;p&gt;We&#x27;ve built the code, now we can even run it!&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;.&#x2F;call_rust
+&lt;pre&gt;&lt;code&gt;.&amp;#x2F;call_rust
 echo $? # Print the return code of our program, hopefully 42
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Great! We&#x27;ve called C from a Rust Library from a C program. But there&#x27;s a catch. This won&#x27;t work if you are building a &lt;code&gt;cdylib&lt;&#x2F;code&gt;. There isn&#x27;t an RFC yet on how to re-export C externs. In the mean time you&#x27;ll either have to: re-export under a different name, or build a &lt;code&gt;dylib&lt;&#x2F;code&gt;. See this issue: &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rust-lang&#x2F;rfcs&#x2F;issues&#x2F;2771&quot;&gt;Re-exporting C symbols for cdylib&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;Hope this helps.&lt;&#x2F;p&gt;
 </content>
@@ -94,12 +88,11 @@ echo $? # Print the return code of our program, hopefully 42
 &lt;h2 id=&quot;how-much-faster&quot;&gt;How much faster?&lt;&#x2F;h2&gt;
 &lt;p&gt;On my machine™, a hello world shell script takes 3ms, a docker equivalent takes 700ms, and a wasm equivalent takes 15ms.&lt;&#x2F;p&gt;
 &lt;p&gt;Following &lt;a href=&quot;https:&#x2F;&#x2F;blog.iron.io&#x2F;the-overhead-of-docker-run&#x2F;&quot;&gt;this experiment&lt;&#x2F;a&gt; I get these results:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;Running: .&#x2F;hello.sh
+&lt;pre&gt;&lt;code&gt;Running: .&amp;#x2F;hello.sh
 avg: 3.516431ms
-Running: docker run treeder&#x2F;hello:sh
+Running: docker run treeder&amp;#x2F;hello:sh
 avg: 692.306769ms
-Running: docker run --rm treeder&#x2F;hello:sh
+Running: docker run --rm treeder&amp;#x2F;hello:sh
 avg: 725.912422ms
 Running: docker start -a reuse
 avg: 655.059021ms
@@ -107,7 +100,7 @@ Running: node hello.js
 avg: 79.233337ms
 Running: wasmer run wasi-hello-world.wasm
 avg: 15.155896ms
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;When I think about how WASM, Docker, and OS VMs (compute instances) play together, I picture this graph below.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;img src=&quot;&#x2F;code&#x2F;wasm-graph.png&quot; alt=&quot;Safety versus overhead – Raw binary is fast unsafe; was is fast and safe; docker is safe.&quot; title=&quot;Safety vs Overhead&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;The trend is that if you want safety and isolation, you must pay for it with overhead. WASM&#x27;s exception to that rule is what I think makes it so promising and interesting. Wasm provides the fastest way to run arbitrary user code in a sandboxed environment.&lt;&#x2F;p&gt;
@@ -129,61 +122,56 @@ avg: 15.155896ms
 &lt;ol&gt;
 &lt;li&gt;Point your domain to TerraFirma servers (&lt;code&gt;terrafirma.marcopolo.io&lt;&#x2F;code&gt; or &lt;code&gt;52.53.126.109&lt;&#x2F;code&gt;) with an A record, and set a &lt;code&gt;TXT&lt;&#x2F;code&gt; record to point to your shared folder (e.g. &lt;code&gt;&amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;&lt;&#x2F;code&gt;)&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;pre&gt;&lt;code&gt;
 example.com 300 A terrafirma.marcopolo.io
 
-_keybase_pages.example.com 300 TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&#x2F;&amp;quot;
+_keybase_pages.example.com 300 TXT &amp;quot;kbp=&amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;my_keybase_username&amp;gt;,kbwasm&amp;#x2F;&amp;quot;
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;2&quot;&gt;
 &lt;li&gt;Verify the DNS records are correct&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;pre&gt;&lt;code&gt;
 $ dig example.com A
 ...
 ;; ANSWER SECTION:
 wasm.marcopolo.io.      300     IN      A       52.53.126.109
 ...
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;br&#x2F;&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;br&#x2F;&gt;
+&lt;pre&gt;&lt;code&gt;
 $ dig _keybase_pages.example.com TXT
 ...
 ;; ANSWER SECTION:
-_keybase_pages.example.com &amp;lt;number&amp;gt; IN TXT &amp;quot;kbp=&#x2F;keybase&#x2F;private&#x2F;&amp;lt;my_keybase_username&amp;gt;,kbpbot&#x2F;&amp;quot;
+_keybase_pages.example.com &amp;lt;number&amp;gt; IN TXT &amp;quot;kbp=&amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;my_keybase_username&amp;gt;,kbpbot&amp;#x2F;&amp;quot;
 ...
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;3&quot;&gt;
 &lt;li&gt;Clone the Hello World Repo&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;git clone git@github.com:MarcoPolo&#x2F;terrafirma-hello-world.git
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre&gt;&lt;code&gt;git clone git@github.com:MarcoPolo&amp;#x2F;terrafirma-hello-world.git
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;4&quot;&gt;
 &lt;li&gt;Build it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;cd terrafirma-hello-world
+&lt;pre&gt;&lt;code&gt;cd terrafirma-hello-world
 cargo build --release
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;5&quot;&gt;
 &lt;li&gt;Deploy it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;
-cp target&#x2F;wasm32-unknown-unknown&#x2F;release&#x2F;terrafirma_helloworld.wasm &#x2F;keybase&#x2F;private&#x2F;&amp;lt;your_kb_username&amp;gt;,kbwasm&#x2F;hello.wasm
+&lt;pre&gt;&lt;code&gt;
+cp target&amp;#x2F;wasm32-unknown-unknown&amp;#x2F;release&amp;#x2F;terrafirma_helloworld.wasm &amp;#x2F;keybase&amp;#x2F;private&amp;#x2F;&amp;lt;your_kb_username&amp;gt;,kbwasm&amp;#x2F;hello.wasm
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;6&quot;&gt;
 &lt;li&gt;Test it&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;curl https:&#x2F;&#x2F;example.com&#x2F;hello.wasm
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;</content>
+&lt;pre&gt;&lt;code&gt;curl https:&amp;#x2F;&amp;#x2F;example.com&amp;#x2F;hello.wasm
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
 	</entry>
 	
 	<entry xml:lang="en">
@@ -287,22 +275,20 @@ set and make those features a &lt;em&gt;joy&lt;&#x2F;em&gt; to use.&lt;&#x2F;p&g
 &lt;p&gt;The biggest change was converting Jekyll&#x27;s front-matter (the stuff at the top
 of the md files) format into Zola&#x27;s front-matter format. Which was changing
 this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;---
+&lt;pre&gt;&lt;code&gt;---
 layout: post
 title: Interacting with Go from React Native through JSI
 categories: javascript react-native jsi go
 ---
 
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;into this:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
-&lt;code&gt;&lt;span style=&quot;color:#c0c5ce;&quot;&gt;+++
+&lt;pre&gt;&lt;code&gt;+++
 title = &amp;quot;Interacting with Go from React Native through JSI&amp;quot;
 [taxonomies]
 tags = [&amp;quot;javascript&amp;quot;, &amp;quot;react-native&amp;quot;, &amp;quot;JSI&amp;quot;, &amp;quot;Go&amp;quot;]
 +++
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;There was also a slight rewrite in the template files that was necessary
 since Zola uses the &lt;a href=&quot;https:&#x2F;&#x2F;tera.netlify.com&quot;&gt;Tera Templating Engine&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;The rest was just moving (I&#x27;d argue organizing) files around.&lt;&#x2F;p&gt;

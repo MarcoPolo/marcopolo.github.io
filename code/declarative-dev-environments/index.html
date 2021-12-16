@@ -15,7 +15,7 @@
     <link type="text/css" rel="stylesheet" href="/css/syntax.css" />
     <link type="text/css" rel="stylesheet" href="/css/zenburn.css" />
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https:&#x2F;&#x2F;marcopolo.io&#x2F;atom.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://marcopolo.io/atom.xml">
     
   </head>
   <body>
@@ -98,39 +98,37 @@ Linux</a>).</p>
 <p>To be concrete, let me show an example. If I wanted to start a JS project and
 use <a href="https://yarnpkg.com/">Yarn</a> as my dependency manager, I would do something
 like this: </p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;"># 1. Create the project folder
-</span><span style="color:#bf616a;">mkdir</span><span style="color:#c0c5ce;"> my-project
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. Create the project folder
+mkdir my-project
 
-</span><span style="color:#65737e;"># 2. Add the boilerplate files.
-</span><span style="color:#c0c5ce;">nix flake init</span><span style="color:#bf616a;"> -t</span><span style="color:#c0c5ce;"> github:marcopolo/templates
+# 2. Add the boilerplate files.
+nix flake init -t github:marcopolo&#x2F;templates
 
-</span><span style="color:#65737e;"># 3. Edit flake.nix file to add yarn and NodeJS.
+# 3. Edit flake.nix file to add yarn and NodeJS.
 # With your text editor apply this diff:
 # -          buildInputs = [ pkgs.hello ];
 # +          buildInputs = [ pkgs.yarn pkgs.nodejs-12_x ];
 
 # 4. Allow direnv to run this environment. This will also fetch yarn with Nix
 #    and add it to your path.
-</span><span style="color:#c0c5ce;">direnv allow
+direnv allow
 
-</span><span style="color:#65737e;"># 5. Yarn is now available, proceed as normal. 
-</span><span style="color:#c0c5ce;">yarn init
-</span></code></pre>
+# 5. Yarn is now available, proceed as normal. 
+yarn init
+</code></pre>
 <p>You can simplify this further by making a Nix Flake template that already has
 Yarn and NodeJS included. </p>
 <h2 id="another-example-setting-up-a-rust-project">Another example. Setting up a Rust project.</h2>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;"># 1. Create the project folder
-</span><span style="color:#bf616a;">mkdir</span><span style="color:#c0c5ce;"> rust-project
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. Create the project folder
+mkdir rust-project
 
-</span><span style="color:#65737e;"># 2. Add the boilerplate files.
-</span><span style="color:#c0c5ce;">nix flake init</span><span style="color:#bf616a;"> -t</span><span style="color:#c0c5ce;"> github:marcopolo/templates#rust
+# 2. Add the boilerplate files.
+nix flake init -t github:marcopolo&#x2F;templates#rust
 
-</span><span style="color:#65737e;"># 3. Cargo and rust is now available, proceed as normal. 
-</span><span style="color:#c0c5ce;">cargo init
-</span><span style="color:#bf616a;">cargo</span><span style="color:#c0c5ce;"> run
-</span></code></pre>
+# 3. Cargo and rust is now available, proceed as normal. 
+cargo init
+cargo run
+</code></pre>
 <p>Here we used a Rust specific template, so no post template init changes were required.</p>
 <h2 id="dissecting-the-flake-nix-file">Dissecting the <code>flake.nix</code> file</h2>
 <p>Let's break down the <code>flake.nix</code> file so we can understand what it is we are
@@ -140,49 +138,49 @@ language</a>. At a high level you
 can read this as JSON but with functions. Like JSON it can only represent
 expressions (you can only have one top level JSON object), unlike JSON you can
 have functions and variables. </p>
-<pre style="background-color:#2b303b;">
-<code><span style="color:#65737e;"># This is our top level set expression. Equivalent to the top level JSON object.
-</span><span style="color:#c0c5ce;">{
-  </span><span style="color:#65737e;"># These are comments
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix"># This is our top level set expression. Equivalent to the top level JSON object.
+{
+  # These are comments
 
   # Here we are defining a set. This is equivalent to a JSON object.
   # The key is description, and the value is the string.
-  </span><span style="color:#d08770;">description </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">A very basic flake</span><span style="color:#c0c5ce;">&quot;;
+  description = &quot;A very basic flake&quot;;
 
-  </span><span style="color:#65737e;"># You can define nested sets by using a `.` between key parts.
+  # You can define nested sets by using a `.` between key parts.
   # This is equivalent to the JSON object {inputs: {flake-utils: {url: &quot;github:...&quot;}}}
-  </span><span style="color:#d08770;">inputs</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">flake-utils</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">url </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">github:numtide/flake-utils</span><span style="color:#c0c5ce;">&quot;;
+  inputs.flake-utils.url = &quot;github:numtide&#x2F;flake-utils&quot;;
 
-  </span><span style="color:#65737e;"># Functions are defined with the syntax of `param: functionBodyExpression`.
+  # Functions are defined with the syntax of `param: functionBodyExpression`.
   # The param can be destructured if it expects a set, like what we are doing here. 
   # This defines the output of this flake. Our dev environment will make use of
   # the devShell attribute, but you can also define the release build of your
   # package here.
-  </span><span style="color:#d08770;">outputs </span><span style="color:#c0c5ce;">= </span><span style="color:#8fa1b3;">{ </span><span style="color:#c0c5ce;">self, nixpkgs, flake-utils </span><span style="color:#8fa1b3;">}</span><span style="color:#c0c5ce;">:
-    </span><span style="color:#65737e;"># This is a helper to generate these outputs for each system (x86-linux,
+  outputs = { self, nixpkgs, flake-utils }:
+    # This is a helper to generate these outputs for each system (x86-linux,
     # arm-linux, macOS, ...)
-    </span><span style="color:#bf616a;">flake-utils</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">lib</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">eachDefaultSystem </span><span style="color:#c0c5ce;">(system:
-      </span><span style="color:#b48ead;">let
-        </span><span style="color:#65737e;"># The nixpkgs repo has to know which system we are using.
-        </span><span style="color:#d08770;">pkgs </span><span style="color:#c0c5ce;">= </span><span style="color:#96b5b4;">import </span><span style="color:#bf616a;">nixpkgs </span><span style="color:#c0c5ce;">{ </span><span style="color:#d08770;">system </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">system</span><span style="color:#c0c5ce;">; };
-      </span><span style="color:#b48ead;">in
-      </span><span style="color:#c0c5ce;">{
-        </span><span style="color:#65737e;"># This is the environment that direnv will use. You can also enter the
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        # The nixpkgs repo has to know which system we are using.
+        pkgs = import nixpkgs { system = system; };
+      in
+      {
+        # This is the environment that direnv will use. You can also enter the
         # shell with `nix shell`. The packages in `buildInputs` are what become
         # available to you in your $PATH. As an example this only has the hello
         # package.
-        </span><span style="color:#d08770;">devShell </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">pkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">mkShell </span><span style="color:#c0c5ce;">{
-          </span><span style="color:#d08770;">buildInputs </span><span style="color:#c0c5ce;">= [ </span><span style="color:#bf616a;">pkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">hello </span><span style="color:#c0c5ce;">];
+        devShell = pkgs.mkShell {
+          buildInputs = [ pkgs.hello ];
         };
 
-        </span><span style="color:#65737e;"># You can also define a package that is built by default when you run
+        # You can also define a package that is built by default when you run
         # `nix build`.  The build command creates a new folder, `result`, that
         # is a symlink to the build output.
-        </span><span style="color:#d08770;">defaultPackage </span><span style="color:#c0c5ce;">= </span><span style="color:#bf616a;">pkgs</span><span style="color:#c0c5ce;">.</span><span style="color:#bf616a;">hello</span><span style="color:#c0c5ce;">;
+        defaultPackage = pkgs.hello;
       });
 }
 
-</span></code></pre><h2 id="on-dev-tools-and-a-dev-setup">On Dev Tools and A Dev Setup</h2>
+</code></pre>
+<h2 id="on-dev-tools-and-a-dev-setup">On Dev Tools and A Dev Setup</h2>
 <p>There is a subtle distinction on what constitutes a Dev Tool vs A Dev Setup. I
 classify Dev Tools as things that need to be available to build or develop a given
 project specifically. Think of <code>gcc</code>, <code>yarn</code>, or <code>cargo</code>. The Dev Setup category
