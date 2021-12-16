@@ -1,6 +1,6 @@
 {
   description = "marcopolo.io";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/release-20.09";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/release-21.11";
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   outputs = { self, nixpkgs, flake-utils }:
